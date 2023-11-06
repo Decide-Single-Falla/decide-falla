@@ -84,8 +84,6 @@ async def hello(ctx):
 @bot.command(name="get_voting", help="Get a voting")
 async def get_voting(ctx, *args):
     # TODO LIST
-    # React to reactions
-    # Stop after x time
     # Message others when they react
     # Delete or lock message after time ?
 
@@ -94,20 +92,20 @@ async def get_voting(ctx, *args):
         return
 
     voting_id = int(args[0])
-    vote = test_votes[voting_id]
+    voting = test_votes[voting_id]
     option_numbers = []
 
     def check(r: discord.Reaction, u: Union[discord.Member, discord.User]):
         return u.id == ctx.author.id and r.message.channel.id == ctx.channel.id and r.message.id == msg.id and \
-               emotes.index(str(r.emoji)) - 1 in range(len(option_numbers))
+               emotes.index(str(r.emoji)) - 1 < counter
 
-    embed = Formatter.format_embed(vote["title"], vote["description"])
+    embed = Formatter.format_embed(voting["title"], voting["description"])
 
     # Reaction lookup table
     emotes = ["0️⃣","1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
 
     counter = 1
-    for option in vote["options"]:
+    for option in voting["options"]:
         embed.add_field(name=emotes[counter], value=option, inline=False)
         counter += 1
 
@@ -123,6 +121,16 @@ async def get_voting(ctx, *args):
         # at this point, the check didn't become True.
         await ctx.send(f"**{ctx.author}**, you didnt react correctly with within 60 seconds.")
         return
+    
+    else:
+        # at this point, the check has become True and the wait_for has done its work, now we can do ours.
+        # here we are sending some text based on the reaction we detected.
+        await post_voting(ctx, reaction, voting, emotes.index(reaction[0].emoji) - 1)
+        return
+
+async def post_voting(ctx, reaction, voting, option_id):
+    # TODO Post voting result to DECIDE
+    return await ctx.send(f"{ctx.author} answered option {str(reaction[0].emoji)}")
 
 ### --- Run Bot --- ###
 
