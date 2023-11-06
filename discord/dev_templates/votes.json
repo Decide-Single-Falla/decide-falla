@@ -1,0 +1,29 @@
+{
+    "votes": [
+        {
+            "title": "Esto es una votación de testing",
+            "description": "Esto es una descripción de testing",
+            "options": ["Opción 1", "Opción 2", "Opción 3"]
+        },
+        {
+            "title": "Las tortillas de patata",
+            "description": "¿Con o sin cebolla?",
+            "options": ["Con cebolla", "Sin cebolla"]
+        },
+        {
+            "title": "¿Qué deporte es el mejor?",
+            "description": "",
+            "options": ["Fútbol", "Baloncesto", "Voleibol", "Golf", "No me gusta el deporte"]
+        },
+        {
+            "title": "Dub o Sub",
+            "description": "¿Cómo prefieres ver el anime?",
+            "options": ["Dub", "Sub", "Sé japonés"]
+        },
+        {
+            "title": "¿Cuál es tu MOBA favorito",
+            "description": "Sé que eres un niño rata",
+            "options": ["LoL", "DOTA", "SMITE", "No me gustan los MOBA"]
+        }
+    ]
+}
