@@ -50,6 +50,22 @@ class VotingView(generics.ListCreateAPIView):
         voting.auths.add(auth)
         return Response({}, status=status.HTTP_201_CREATED)
 
+class VotingDetailsView(generics.RetrieveAPIView):
+    queryset = Voting.objects.all()
+    serializer_class = VotingSerializer
+    filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
+    filterset_fields = ('id', )
+    
+    def get(self, request, *args, **kwargs):
+        idpath = kwargs.get('voting_id')
+        self.queryset = Voting.objects.all()
+        version = request.version
+        if version not in settings.ALLOWED_VERSIONS:
+            version = settings.DEFAULT_VERSION
+        if version == 'v2':
+            self.serializer_class = SimpleVotingSerializer
+
+        return super().get(request, *args, **kwargs)
 
 class VotingUpdate(generics.RetrieveUpdateDestroyAPIView):
     queryset = Voting.objects.all()
