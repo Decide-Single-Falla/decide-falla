@@ -4,11 +4,11 @@ import json
 import asyncio
 
 import discord
-import Paginator
+#import Paginator
 import requests
 import utils.formatter as Formatter
 
-from discord.ext import commands, tasks
+from discord.ext import commandsd
 from dotenv import load_dotenv
 
 from typing import Union
@@ -42,7 +42,10 @@ async def on_ready():
     await bot_channel.send("Bot is online!")
 
     if DECIDE_MODE:
-        init_ping = requests.get(f'{BASE_URL}/admin/login/')
+        try:
+            init_ping = requests.get(f'{BASE_URL}/admin/login/', timeout=10)
+        except requests.exceptions.Timeout:
+            print("Init process failed!")
 
         try:
             if init_ping.status_code == 200:
@@ -51,8 +54,8 @@ async def on_ready():
             else:
                 print("Init process failed!")
                 exit()
-        except:
-            print("Init process failed!")
+        except requests.exceptions.HTTPError as err:
+            print("Init process failed: " + str(err))
             exit()
 
 @bot.event
@@ -70,7 +73,7 @@ async def on_command_error(ctx, error):
     if DEV_MODE:
         message += f'\n{error}'
     else:
-        message += f'An error has occurred, please try again!'
+        message += 'An error has occurred, please try again!'
 
     print(error)
     await ctx.send(message)
@@ -109,7 +112,6 @@ async def get_voting(ctx, *args):
 
     voting_id = int(args[0])
     voting = test_votes[voting_id]
-    option_numbers = []
 
     # TODO Add error message for wrong reaction
     def check(r: discord.Reaction, u: Union[discord.Member, discord.User]):
@@ -138,7 +140,6 @@ async def get_voting(ctx, *args):
         # at this point, the check didn't become True.
         await ctx.send(f"**{ctx.author}**, you didnt react correctly with within 60 seconds.")
         return
-    
     else:
         # at this point, the check has become True and the wait_for has done its work, now we can do ours.
         # here we are sending some text based on the reaction we detected.
