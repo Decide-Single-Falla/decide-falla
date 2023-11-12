@@ -8,7 +8,7 @@ import discord
 import requests
 import utils.formatter as Formatter
 
-from discord.ext import commandsd
+from discord.ext import commands
 from dotenv import load_dotenv
 
 from typing import Union
