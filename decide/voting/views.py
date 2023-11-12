@@ -55,9 +55,8 @@ class VotingDetailsView(generics.RetrieveAPIView):
     serializer_class = VotingSerializer
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
     filterset_fields = ('id', )
-    
+
     def get(self, request, *args, **kwargs):
-        idpath = kwargs.get('voting_id')
         self.queryset = Voting.objects.all()
         version = request.version
         if version not in settings.ALLOWED_VERSIONS:

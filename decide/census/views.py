@@ -59,7 +59,6 @@ class CensusListView(generics.ListAPIView):
     filterset_fields = ('id', )
 
     def get(self, request, voting_id, *args, **kwargs):
-        idpath = kwargs.get('census_id')
         self.queryset = Census.objects.filter(voting_id=voting_id)
 
         return super().get(request, *args, **kwargs)
