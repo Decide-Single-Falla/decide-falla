@@ -81,6 +81,22 @@ async def on_command_error(ctx, error):
 async def hello(ctx):
     await ctx.send("Hello!")
 
+@bot.command(name="get_votes", help="Get help")
+async def get_votes(ctx):
+    #response = requests.get(base_url + "voting/")
+    #votings = response.json()
+    votings = test_votes
+
+    embed = discord.Embed(title='Votings', color=discord.Color.random())
+
+    for voting in votings:
+        #if voting["start_date"] is not None and voting["end_date"] is None and voting["public"]:
+        #    embed.add_field(name=f'{voting["id"]}: {voting["name"]}', value=voting["question"]["desc"], inline=False)
+        embed.add_field(name=f'{voting["id"]}: {voting["title"]}', value=voting["description"], inline=False)
+
+    print(f"{ctx.author} requested the list of votings")
+    await ctx.send(embed=embed)
+
 @bot.command(name="get_voting", help="Get a voting")
 async def get_voting(ctx, *args):
     # TODO LIST
@@ -95,6 +111,7 @@ async def get_voting(ctx, *args):
     voting = test_votes[voting_id]
     option_numbers = []
 
+    # TODO Add error message for wrong reaction
     def check(r: discord.Reaction, u: Union[discord.Member, discord.User]):
         return u.id == ctx.author.id and r.message.channel.id == ctx.channel.id and r.message.id == msg.id and \
                emotes.index(str(r.emoji)) - 1 < counter
