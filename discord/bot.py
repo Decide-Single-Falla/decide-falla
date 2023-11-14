@@ -161,7 +161,6 @@ async def list_active_votings(ctx):
 async def list_all_votings(ctx):
     response = requests.get(BASE_URL + "voting/", timeout=5)
     votings = response.json()
-    
     embed = discord.Embed(title='Votings', color=discord.Color.random())
     for voting in votings:
         embed.add_field(name=f'{voting["id"]}: {voting["name"]}', value=voting["question"]["desc"], inline=False)
