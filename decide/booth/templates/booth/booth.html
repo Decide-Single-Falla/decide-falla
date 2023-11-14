@@ -20,13 +20,18 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item" v-if="!signup">
+                    <li class="nav-item" v-if="!signup && !voting.private">
                         <button v-on:click="decideLogout" class="btn btn-secondary">{% trans "Logout" %}</button>
                     </li>
-                    <li class="nav-item" v-if="signup">
+                    <li class="nav-item" v-if="signup && !voting.private">
                         <!-- Button trigger modal -->
                         <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#registerModal">
                             Login
+                        </button>
+                    </li>
+                    <li class = "nav-item" v-if="voting.private">
+                        <button type="button" class="btn btn-secondary">
+                            This voting is private. No needs of login
                         </button>
                     </li>
                 </ul>
@@ -64,7 +69,7 @@
     </div>
 
     <div class="voting" >
-        <div class="alert alert-primary d-flex align-items-center me-5" role="alert" :variant="alertLvl" dismissible v-if="signup">
+        <div class="alert alert-primary d-flex align-items-center me-5" role="alert" :variant="alertLvl" dismissible v-if="signup && !voting.private">
             {% comment %} <svg class="bi flex-shrink-0 me-2" role="img" aria-label="Danger:"><use xlink:href="#exclamation-triangle-fill"/></svg> {% endcomment %}
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-in-right" viewBox="0 0 16 16">
                 <path fill-rule="evenodd" d="M6 3.5a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-2a.5.5 0 0 0-1 0v2A1.5 1.5 0 0 0 6.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-8A1.5 1.5 0 0 0 5 3.5v2a.5.5 0 0 0 1 0v-2z"/>
@@ -115,7 +120,7 @@
         </div>
 
         <!-- Voting -->
-        <div v-if="!signup">
+        <div v-if="!signup || voting.private">
             <h1>[[ voting.id ]] - [[ voting.name ]]</h1>
             <h2>[[ voting.question.desc ]]</h2>
             <form v-for="opt in voting.question.options" :key="opt.number">
@@ -127,9 +132,16 @@
                         [[ opt.option ]]
                 </div>
             </form>
-            <button class="btn btn-primary mt-3" v-on:click="decideSend">
-                {% trans "Vote" %}
-            </button>
+            <div v-if="!voting.private">
+                <button class="btn btn-primary mt-3" v-on:click="decideSend">
+                    {% trans "Vote" %}
+                </button>
+            </div>
+            <div v-if="voting.private">
+                <button class="btn btn-primary mt-3" v-on:click="decideSendAnonymous">
+                    {% trans "Vote" %}
+                </button>
+            </div>
         </div>
 
     </div>
@@ -246,7 +258,6 @@
                         });
                 },
                 decideLogout(evt) {
-                    evt.preventDefault();
                     var data = {token: this.token};
                     this.postData("{% url "gateway" "authentication" "/logout/" %}", data);
                     this.token = null;
@@ -254,7 +265,9 @@
                     this.alertShow = false;
                     document.cookie = 'decide=;';
                     this.signup = true;
-                    this.successVote = false;
+                    if(!this.voting.private){
+                        this.successVote = false;
+                    }
                 },
                 decideEncrypt() {
                     var bigmsg = BigInt.fromJSONObject(this.selected.toString());
@@ -271,6 +284,48 @@
                         token: this.token
                     }
                     this.postData("{% url "gateway" "store" "/" %}", data)
+                        .then(data => {
+                            this.successVote = true;
+                            this.alertShow = false;
+                            this.showAlert("success", '{% trans "Congratulations. Your vote has been sent" %}');
+                        })
+                        .catch(error => {
+                            this.succesVote = false;
+                            this.showAlert("danger", '{% trans "Error: " %}' + error);
+                        });
+                },
+                async decideSendAnonymous(evt) {
+                    if (!(this.user === "undefined")){
+                        await this.decideLogout();
+                    }
+                    await this.decideAnonymousLogin();
+                    
+                    await this.decideAnonymousVote();
+
+                    await this.decideLogout();
+                },
+                async decideAnonymousLogin(evt){
+                    login_info = {"username":"anonymous","password":"tbo12345"};
+                    await this.postData("{% url "gateway" "authentication" "/login/" %}", login_info)
+                        .then(data => {
+                            document.cookie = 'decide='+data.token+';';
+                            this.token = data.token;
+                            this.getUser();
+                            this.alertShow = false;
+                        })
+                        .catch(error => {
+                            this.showAlert("danger", '{% trans "Error in anonymous login: " %}' + error);
+                        });
+                },
+                async decideAnonymousVote(evt){
+                    var v = this.decideEncrypt();
+                    var data = {
+                        vote: {a: v.alpha.toString(), b: v.beta.toString()},
+                        voting: this.voting.id,
+                        voter: 2,
+                        token: this.token
+                    }
+                    await this.postData("{% url "gateway" "store" "/" %}", data)
                         .then(data => {
                             this.successVote = true;
                             this.alertShow = false;
