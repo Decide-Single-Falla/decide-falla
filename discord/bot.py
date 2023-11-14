@@ -147,7 +147,7 @@ async def get_voting(ctx, *args):
         return
 
 @bot.command(name="list_active_votings", help="List all votings")
-async def list_votings(ctx):
+async def list_active_votings(ctx):
     response = requests.get(BASE_URL + "voting/", timeout=5)
     votings = response.json()
 
@@ -155,18 +155,16 @@ async def list_votings(ctx):
     for voting in votings:
         if voting["start_date"] and voting["pub_key"] and voting["end_date"] is None:
             embed.add_field(name=f'{voting["id"]}: {voting["name"]}', value=voting["question"]["desc"], inline=False)
-            
     await ctx.send(embed=embed)
 
 @bot.command(name="list_all_votings", help="List all votings")
-async def list_votings(ctx):
+async def list_all_votings(ctx):
     response = requests.get(BASE_URL + "voting/", timeout=5)
     votings = response.json()
     
     embed = discord.Embed(title='Votings', color=discord.Color.random())
     for voting in votings:
         embed.add_field(name=f'{voting["id"]}: {voting["name"]}', value=voting["question"]["desc"], inline=False)
-
     await ctx.send(embed=embed)
 
 async def post_voting(ctx, reaction, voting, option_id):
