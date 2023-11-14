@@ -146,6 +146,25 @@ async def get_voting(ctx, *args):
         await post_voting(ctx, reaction, voting, emotes.index(reaction[0].emoji) - 1)
         return
 
+@bot.command(name="list_votings", help="List all votings")
+async def list_votings(ctx):
+    response = requests.get(BASE_URL + "voting/")
+    votings = response.json()
+
+    embed = discord.Embed(title='Votings', color=discord.Color.random())
+    print("Llega aquí")
+    for voting in votings:
+        print("Voting: " + str(voting))
+        if voting["start_date"]:
+            embed.add_field(name=f'{voting["id"]}: {voting["name"]}', value=voting["question"]["desc"], inline=False)
+            print("Embed: " + str(embed.fields))
+
+    print("El embed tiene: " + str(embed.fields))
+    print(f"{ctx.author} requested the list of votings")
+    await ctx.send(embed=embed)
+
+
+
 async def post_voting(ctx, reaction, voting, option_id):
     # TODO Post voting result to DECIDE
     return await ctx.send(f"{ctx.author} answered option {str(reaction[0].emoji)}")
