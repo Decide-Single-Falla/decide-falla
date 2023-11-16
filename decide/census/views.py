@@ -1,5 +1,7 @@
 from django.db.utils import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
+from .serializers import CensusSerializer
+import django_filters.rest_framework
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.status import (
@@ -49,3 +51,14 @@ class CensusDetail(generics.RetrieveDestroyAPIView):
         except ObjectDoesNotExist:
             return Response('Invalid voter', status=ST_401)
         return Response('Valid voter')
+
+class CensusListView(generics.ListAPIView):
+    queryset = Census.objects.all()
+    serializer_class = CensusSerializer
+    filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
+    filterset_fields = ('id', )
+
+    def get(self, request, voting_id, *args, **kwargs):
+        self.queryset = Census.objects.filter(voting_id=voting_id)
+
+        return super().get(request, *args, **kwargs)
