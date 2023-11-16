@@ -47,16 +47,16 @@ class StoreView(generics.ListAPIView):
         vote = request.data.get('vote')
 
         if not vid or not vote:
-                return Response({}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
-        if(voting[0].get('private')):
+        if (voting[0].get('private')):
 
             token = request.auth.key
 
             voter = mods.post('authentication', entry_point='/getuser/', json={'token': token})
 
             uid = request.data.get('voter')
-            
+
             a = vote.get("a")
             b = vote.get("b")
 
