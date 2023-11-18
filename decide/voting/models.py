@@ -36,6 +36,8 @@ class Voting(models.Model):
     start_date = models.DateTimeField(blank=True, null=True)
     end_date = models.DateTimeField(blank=True, null=True)
 
+    private = models.BooleanField(help_text = 'If it is checked, the voting will be anonymous')
+
     pub_key = models.OneToOneField(Key, related_name='voting', blank=True, null=True, on_delete=models.SET_NULL)
     auths = models.ManyToManyField(Auth, related_name='votings')
 
@@ -131,3 +133,4 @@ class Voting(models.Model):
 
     def __str__(self):
         return self.name
+        
