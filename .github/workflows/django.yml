@@ -5,7 +5,7 @@ on:
     branches:
       - develop
       - master
-      - feature_6_decide_CI/CD
+      - feature_5_decide_CI/CD
 
 jobs:
   build:
