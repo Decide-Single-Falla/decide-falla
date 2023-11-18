@@ -1,10 +1,11 @@
-# prueba de github actions
 name: Python application
+
 on:
   push:
     branches:
       - develop
       - master
+      - feature_6_decide_CI/CD
 
 jobs:
   build:
