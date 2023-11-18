@@ -2,10 +2,8 @@ name: Python application
 
 on:
   push:
-    branches:
-      - develop
-      - master
-      - feature_5_decide_CI/CD
+    branches-ignore:
+      - '*'
 
 jobs:
   build:
@@ -48,7 +46,7 @@ jobs:
     - name: Run tests
       run: |
         cd decide
-        coverage run --branch --source=. ./manage.py test  --keepdb 
+        coverage run --branch --source=. ./manage.py test
         coverage xml 
     - name: Codacy Coverage Reporter
       uses: codacy/codacy-coverage-reporter-action@v1
