@@ -1,14 +1,19 @@
+from pickle import BININT
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
+from base.models import BigBigField
 import django_filters.rest_framework
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework import generics
 
+from mixnet.mixcrypt import rand
 from .models import Vote
 from .serializers import VoteSerializer
 from base import mods
 from base.perms import UserIsStaff
+
+from Crypto.PublicKey import ElGamal
 
 
 class StoreView(generics.ListAPIView):
@@ -98,4 +103,65 @@ class StoreView(generics.ListAPIView):
         v.save()
 
         return  Response({})
+
+class DiscordStoreView(generics.CreateAPIView):
+    queryset = Vote.objects.all()
+    serializer_class = VoteSerializer
+    filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
+    filterset_fields = ('voting_id', 'voter_id')
+
+    def post(self, request, voting_id, voter_id, selectedOption):
+
+        """
+         * voting: id
+         * voter: id
+         * vote: { "a": int, "b": int }
+        """
+
+        voting = mods.get('voting', params={'id': voting_id})
+        start_date = voting[0].get('start_date', None)
+        # print ("Start date: "+  start_date)
+        end_date = voting[0].get('end_date', None)
+        #print ("End date: ", end_date)
+        not_started = not start_date or timezone.now() < parse_datetime(start_date)
+        #print (not_started)
+        is_closed = end_date and parse_datetime(end_date) < timezone.now()
+        numberOfOptions = len(voting[0].get('question').get('options'))
+
+        if (numberOfOptions < selectedOption) | selectedOption == 0:
+            return Response({"Invalid option"}, status=status.HTTP_401_UNAUTHORIZED)
+        elif not_started or is_closed:
+            #print("por aqui 42")
+            return Response({"This voting is closed"}, status=status.HTTP_401_UNAUTHORIZED)
         
+        bigpk = {
+            'p': (voting[0].get('pub_key').get('p')),
+            'g': (voting[0].get('pub_key').get('g')),
+            'y': (voting[0].get('pub_key').get('y')),
+        }
+        k = DiscordStoreView.getk(bigpk)
+        cipher = DiscordStoreView.encrypt(selectedOption, k)
+        a = str(cipher[0])
+        b = str(cipher[1])
+
+
+        defs = { "a": a, "b": b }
+        v, _ = Vote.objects.get_or_create(voting_id=voting_id, voter_id=voter_id,
+                                        defaults=defs)
+        v.a = a
+        v.b = b
+
+        v.save()
+
+        return Response({})
+    
+    def encrypt(m, k):
+        r = rand(k.p)
+        a, b = k._encrypt(m, r)
+        return a, b
+
+    def getk(bigpk):
+        x = rand(bigpk.get('p'))
+        y = pow(bigpk.get('g'), x, bigpk.get('p'))
+        k = ElGamal.construct((bigpk.get('p'), bigpk.get('g'), y, x))
+        return k
