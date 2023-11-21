@@ -7,13 +7,12 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework import generics
 
-from mixnet.mixcrypt import rand
 from .models import Vote
 from .serializers import VoteSerializer
 from base import mods
 from base.perms import UserIsStaff
 
-from Crypto.PublicKey import ElGamal
+import random
 
 
 class StoreView(generics.ListAPIView):
@@ -139,8 +138,7 @@ class DiscordStoreView(generics.CreateAPIView):
             'g': (voting[0].get('pub_key').get('g')),
             'y': (voting[0].get('pub_key').get('y')),
         }
-        k = DiscordStoreView.getk(bigpk)
-        cipher = DiscordStoreView.encrypt(selectedOption, k)
+        cipher = DiscordStoreView.encrypt(bigpk, selectedOption)
         a = str(cipher[0])
         b = str(cipher[1])
 
@@ -155,13 +153,22 @@ class DiscordStoreView(generics.CreateAPIView):
 
         return Response({})
     
-    def encrypt(m, k):
-        r = rand(k.p)
-        a, b = k._encrypt(m, r)
-        return a, b
+    def get_random_integer(max_value):
+        bit_length = max_value.bit_length()
+        random_num = random.getrandbits(bit_length)
+        return random_num % max_value    
+    
+    def encrypt(pk, m, r=None):
+        bits = 256
+        if m == 0:
+            raise ValueError("Can't encrypt 0 with El Gamal")
 
-    def getk(bigpk):
-        x = rand(bigpk.get('p'))
-        y = pow(bigpk.get('g'), x, bigpk.get('p'))
-        k = ElGamal.construct((bigpk.get('p'), bigpk.get('g'), y, x))
-        return k
+        if r is None:
+            q = 2 ** bits
+            q1 = q - 1
+            r = DiscordStoreView.get_random_integer(q1)
+
+        alpha = pow(pk.get('g'), r, pk.get('p'))
+        beta = (pow(pk.get('y'), r, pk.get('p')) * m) % pk.get('p')
+
+        return (alpha, beta)
