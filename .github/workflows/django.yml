@@ -1,5 +1,6 @@
 name: Python application
 
+# actions
 on:
   push:
     branches-ignore:
