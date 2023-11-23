@@ -41,7 +41,7 @@ async def bot():
     # Teardown
     await dpytest.empty_queue() # empty the global message queue as test teardown
 
-############# TEST #############
+############# TEST ############# DONE
 
 #TODO: Create a votation in the database and test the list_all_votings command
 
