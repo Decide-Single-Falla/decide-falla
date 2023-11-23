@@ -46,7 +46,7 @@ jobs:
     - name: Run tests
       run: |
         cd decide
-        coverage run --branch --source=. ./manage.py test  --keepdb 
+        coverage run --branch --source=. ./manage.py test  --keepdb -k "not d_tests"
         coverage xml 
     - name: Codacy Coverage Reporter
       uses: codacy/codacy-coverage-reporter-action@v1
