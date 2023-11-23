@@ -48,9 +48,9 @@ jobs:
         cd decide
         coverage run --branch --source=. ./manage.py test  --keepdb
         coverage xml 
-    - name: Run specific test
+    - name: Run discord test
       run: |
-        cd decide/voting
+        cd voting
         pytest discord_t.py
     - name: Codacy Coverage Reporter
       uses: codacy/codacy-coverage-reporter-action@v1
