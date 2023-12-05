@@ -14,6 +14,7 @@ from base.tests import BaseTestCase
 from census.models import Census
 from mixnet.models import Key
 from voting.models import Question
+from voting.models import QuestionOption
 from voting.models import Voting
 
 
@@ -192,4 +193,209 @@ class StoreTextCase(BaseTestCase):
         self.voting.end_date = timezone.now() - datetime.timedelta(days=1)
         self.voting.save()
         response = self.client.post('/store/', data, format='json')
+        self.assertEqual(response.status_code, 401)
+
+    def test_vote(self):
+        self.gen_votes()
+        response = self.client.get('/store/', format='json')
+        self.assertEqual(response.status_code, 401)
+
+        self.login(user='noadmin')
+        response = self.client.get('/store/', format='json')
+        self.assertEqual(response.status_code, 403)
+
+        self.login()
+        response = self.client.get('/store/', format='json')
+        self.assertEqual(response.status_code, 200)
+        votes = response.json()
+
+        self.assertEqual(len(votes), Vote.objects.count())
+        self.assertEqual(votes[0], VoteSerializer(Vote.objects.all().first()).data)
+
+    def test_filter(self):
+        votings, voters = self.gen_votes()
+        v = votings[0]
+
+        response = self.client.get('/store/?voting_id={}'.format(v), format='json')
+        self.assertEqual(response.status_code, 401)
+
+        self.login(user='noadmin')
+        response = self.client.get('/store/?voting_id={}'.format(v), format='json')
+        self.assertEqual(response.status_code, 403)
+
+        self.login()
+        response = self.client.get('/store/?voting_id={}'.format(v), format='json')
+        self.assertEqual(response.status_code, 200)
+        votes = response.json()
+
+        self.assertEqual(len(votes), Vote.objects.filter(voting_id=v).count())
+
+        v = voters[0]
+        response = self.client.get('/store/?voter_id={}'.format(v), format='json')
+        self.assertEqual(response.status_code, 200)
+        votes = response.json()
+
+        self.assertEqual(len(votes), Vote.objects.filter(voter_id=v).count())
+
+    def test_hasvote(self):
+        votings, voters = self.gen_votes()
+        vo = Vote.objects.first()
+        v = vo.voting_id
+        u = vo.voter_id
+
+        response = self.client.get('/store/?voting_id={}&voter_id={}'.format(v, u), format='json')
+        self.assertEqual(response.status_code, 401)
+
+        self.login(user='noadmin')
+        response = self.client.get('/store/?voting_id={}&voter_id={}'.format(v, u), format='json')
+        self.assertEqual(response.status_code, 403)
+
+        self.login()
+        response = self.client.get('/store/?voting_id={}&voter_id={}'.format(v, u), format='json')
+        self.assertEqual(response.status_code, 200)
+        votes = response.json()
+
+        self.assertEqual(len(votes), 1)
+        self.assertEqual(votes[0]["voting_id"], v)
+        self.assertEqual(votes[0]["voter_id"], u)
+
+    def test_voting_status(self):
+        data = {
+            "voting": 5001,
+            "voter": 1,
+            "vote": { "a": 30, "b": 55 }
+        }
+        census = Census(voting_id=5001, voter_id=1)
+        census.save()
+        # not opened
+        self.voting.start_date = timezone.now() + datetime.timedelta(days=1)
+        self.voting.save()
+        user = self.get_or_create_user(1)
+        self.login(user=user.username)
+        response = self.client.post('/store/', data, format='json')
+        self.assertEqual(response.status_code, 401)
+
+        # not closed
+        self.voting.start_date = timezone.now() - datetime.timedelta(days=1)
+        self.voting.save()
+        self.voting.end_date = timezone.now() + datetime.timedelta(days=1)
+        self.voting.save()
+        response = self.client.post('/store/', data, format='json')
+        self.assertEqual(response.status_code, 200)
+
+        # closed
+        self.voting.end_date = timezone.now() - datetime.timedelta(days=1)
+        self.voting.save()
+        response = self.client.post('/store/', data, format='json')
+        self.assertEqual(response.status_code, 401)
+
+class StoreDiscordTestCase(BaseTestCase):
+
+    def setUp(self):
+        super().setUp()
+        self.question = Question(desc='Discord test question')
+        self.question.save()
+        self.questionOption = QuestionOption(question = self.question, number = 1, option = 'Discord test option')
+        self.questionOption.save()
+        self.pub_key = Key(
+                         p = 70231406362306344090225989749017969969678324391204499979828159692550421617459,
+                         g = 25943344578732287435064720875717831230723987786285223171781188446421474939830,
+                         y = 42255321982391907760391246745603444196092319848940113576180033593436149670776
+                         )
+        self.pub_key.save()
+
+        self.voting = Voting(pk = 50014,
+                             name = 'Discord test voting',
+                             question = self.question,
+                             start_date = timezone.now(),
+                             pub_key = self.pub_key,
+                            )
+        self.voting.save()
+
+    def tearDown(self):
+        super().tearDown()
+
+    def gen_voting(self, pk):
+        pub_key = Key(
+                         p = 70231406322306344090225989749017969969678324391204499979828159692550421617459,
+                         g = 25943344578732287435064720875717831230723987786285221171781188446421474939830,
+                         y = 42255321982391907760391246745603444196092419848940113576180033593436149670776
+                         )
+        pub_key.save()
+        voting = Voting(pk=pk, name='v1', question=self.question, start_date=timezone.now(),
+                 pub_key = pub_key, end_date=timezone.now() + datetime.timedelta(days=1))
+        voting.save()
+
+    def get_or_create_user(self, pk):
+        user, _ = User.objects.get_or_create(pk=pk)
+        user.username = 'user{}'.format(pk)
+        user.set_password('qwerty')
+        user.save()
+        return user
+
+    def test_gen_vote_invalid_voting(self):
+        
+        votingId = 1
+        voterId = 1
+        selectedOption = 1
+
+        response = self.client.post('/store/discord/{}/{}/{}/'.format(votingId,voterId,selectedOption))
+        self.assertEqual(response.status_code, 401)
+
+    def test_gen_vote_invalid_option(self):
+
+        votingId = 50014
+        voterId = 1
+        selectedOption = 0
+
+        response = self.client.post('/store/discord/{}/{}/{}/'.format(votingId,voterId,selectedOption))
+        self.assertEqual(response.status_code, 401)
+
+        selectedOption = 10
+
+        response = self.client.post('/store/discord/{}/{}/{}/'.format(votingId,voterId,selectedOption))
+        self.assertEqual(response.status_code, 401)
+
+    def test_store_vote(self):
+
+        votingId = 50015
+        voterId = 1
+        selectedOption = 1
+
+        self.gen_voting(votingId)
+        user = self.get_or_create_user(1)
+        self.login(user=user.username)
+        response = self.client.post('/store/discord/{}/{}/{}/'.format(votingId,voterId,selectedOption))
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(Vote.objects.count(), 1)
+        self.assertEqual(Vote.objects.first().voting_id, 50015)
+        self.assertEqual(Vote.objects.first().voter_id, 1)
+
+    def test_voting_status(self):
+
+        votingId = 50014
+        voterId = 1
+        selectedOption = 1
+
+        # not opened
+        self.voting.start_date = timezone.now() + datetime.timedelta(days=1)
+        self.voting.save()
+        user = self.get_or_create_user(1)
+        self.login(user=user.username)
+        response = self.client.post('/store/discord/{}/{}/{}/'.format(votingId,voterId,selectedOption))
+        self.assertEqual(response.status_code, 401)
+
+        # not closed
+        self.voting.start_date = timezone.now() - datetime.timedelta(days=1)
+        self.voting.save()
+        self.voting.end_date = timezone.now() + datetime.timedelta(days=1)
+        self.voting.save()
+        response = self.client.post('/store/discord/{}/{}/{}/'.format(votingId,voterId,selectedOption))
+        self.assertEqual(response.status_code, 200)
+
+        # closed
+        self.voting.end_date = timezone.now() - datetime.timedelta(days=1)
+        self.voting.save()
+        response = self.client.post('/store/discord/{}/{}/{}/'.format(votingId,voterId,selectedOption))
         self.assertEqual(response.status_code, 401)

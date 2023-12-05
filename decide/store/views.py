@@ -118,7 +118,11 @@ class DiscordStoreView(generics.CreateAPIView):
         """
 
         voting = mods.get('voting', params={'id': voting_id})
+        if not voting or not isinstance(voting, list):
+            # print("por aqui 35")
+            return Response({}, status=status.HTTP_401_UNAUTHORIZED)
         start_date = voting[0].get('start_date', None)
+        
         # print ("Start date: "+  start_date)
         end_date = voting[0].get('end_date', None)
         #print ("End date: ", end_date)
@@ -127,7 +131,7 @@ class DiscordStoreView(generics.CreateAPIView):
         is_closed = end_date and parse_datetime(end_date) < timezone.now()
         numberOfOptions = len(voting[0].get('question').get('options'))
 
-        if (numberOfOptions < selectedOption) | selectedOption == 0:
+        if (numberOfOptions < selectedOption) or selectedOption == 0:
             return Response({"Invalid option"}, status=status.HTTP_401_UNAUTHORIZED)
         elif not_started or is_closed:
             #print("por aqui 42")
