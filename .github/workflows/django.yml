@@ -2,8 +2,9 @@ name: Python application
 
 on:
   push:
-    branches-ignore:
-      - '*'
+    branches:
+      - master
+      - develop
 
 jobs:
   build:
