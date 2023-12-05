@@ -193,3 +193,55 @@ class StoreTextCase(BaseTestCase):
         self.voting.save()
         response = self.client.post('/store/', data, format='json')
         self.assertEqual(response.status_code, 401)
+
+class StorePrivateTextCase(BaseTestCase):
+
+    def setUp(self):
+        super().setUp()
+        self.question = Question(desc='qwerty')
+        self.question.save()
+        self.voting = Voting(pk=5001,
+                             name='voting example',
+                             question=self.question,
+                             start_date=timezone.now(),
+                             private = True,
+        )
+        self.voting.save()
+
+        user_anonymous = User(username='anonymous')
+        user_anonymous.set_password('tbo12345')
+        user_anonymous.save()
+        
+        data = {'username': 'anonymous', 'password': 'tbo12345'}
+        response = mods.post('authentication/login', json=data, response=True)
+        self.assertEqual(response.status_code, 200)
+        self.token = response.json().get('token')
+        self.assertTrue(self.token)
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token)
+
+    def tearDown(self):
+        super().tearDown()
+
+    def test_store_multiple_private_vote(self):
+        
+        dataStore1 = {
+            "voting": 5001,
+            "voter": 1,
+            "vote": { "a": 96, "b": 184 }
+        }
+
+        dataStore2 = {
+            "voting": 5001,
+            "voter": 1,
+            "vote": { "a": 192, "b": 368 }
+        }
+
+        response = self.client.post('/store/', dataStore1, format='json')
+        self.assertEqual(response.status_code, 200)
+
+
+        response = self.client.post('/store/', dataStore2, format='json')
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(Vote.objects.count(), 2)
+    
