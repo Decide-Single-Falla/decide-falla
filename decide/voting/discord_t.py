@@ -8,6 +8,14 @@ import discord.ext.test as dpytest
 from discord import Embed, Color
 from dotenv import load_dotenv
 
+import os
+import django
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'decide.settings')
+django.setup()
+
+from .models import Voting
+
 load_dotenv()
 
 BASE_URL = 'http://localhost:8000/'
@@ -51,4 +59,41 @@ async def test_list_all_votings(bot):
     title = dpytest.get_embed().title
     assert "Votings" in title
 
-    
+
+# Fake test
+
+@pytest.mark.asyncio
+async def test_embed_peek(bot):
+    guild = bot.guilds[0]
+    channel = guild.text_channels[0]
+
+    embed = discord.Embed(title="Test Embed")
+    embed.add_field(name="Field 1", value="Lorem ipsum")
+
+    embed2 = embed = discord.Embed(title="Test Embed")
+    embed2.add_field(name="Field 1", value="Lorem ipsum")
+
+    await channel.send(embed=embed)
+
+    # peek option doesn't remove the message fro the queue
+    assert dpytest.verify().message().peek().embed(embed2)
+    # verify_embed (without peek) WILL remove emebd from the queue
+    assert dpytest.verify().message().embed(embed2)    
+
+
+@pytest.fixture
+def voting(db):
+    voting = Voting.objects.create(name="Test Voting", description="This is a test voting")
+    print("Voting created: ", voting)
+    return voting
+
+@pytest.mark.asyncio
+async def test_list_all_votings(bot):
+    await dpytest.message("!list_all_votings")
+    response = dpytest.get_message()
+    embed = response.embeds[0]
+    print("Embed es: ", embed)
+    print("Embed to dict es: ", embed.to_dict())
+    assert embed.title == "Votings"
+    # embed is: {'fields': [{'inline': False, 'name': '2: Mejor juego del año', 'value': 'Cual es el mejor juego del año'}, {'inline': False, 'name': '3: peor juego del año', 'value': 'peor juego del año'}, {'inline': False, 'name': '4: voy a aprobar?', 'value': 'voy a aprobar'}], 'color': 16736000, 'type': 'rich', 'title': 'Votings'}
+    # assert embed.
