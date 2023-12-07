@@ -158,7 +158,6 @@ class DiscordStoreView(generics.CreateAPIView):
         bit_length = max_value.bit_length()
         random_num = random.getrandbits(bit_length)
         return random_num % max_value
-    
     def encrypt(pk, m, r=None):
         bits = 256
         if m == 0:
