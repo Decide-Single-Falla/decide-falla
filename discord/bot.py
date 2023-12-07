@@ -4,7 +4,7 @@ import json
 import asyncio
 
 import discord
-#import Paginator
+import Paginator
 import requests
 import utils.formatter as Formatter
 
@@ -149,22 +149,42 @@ async def get_voting(ctx, *args):
 @bot.command(name="list_active_votings", help="List all votings")
 async def list_active_votings(ctx):
     response = requests.get(BASE_URL + "voting/", timeout=5)
-    votings = response.json()
-
-    embed = discord.Embed(title='Active votings', color=discord.Color.random())
-    for voting in votings:
-        if voting["start_date"] and voting["pub_key"] and voting["end_date"] is None:
-            embed.add_field(name=f'{voting["id"]}: {voting["name"]}', value=voting["question"]["desc"], inline=False)
-    await ctx.send(embed=embed)
+    votings = response.json()   
+    embeds = format_votings_list(votings)
+    await Paginator.Simple().start(ctx, pages=embeds)
 
 @bot.command(name="list_all_votings", help="List all votings")
 async def list_all_votings(ctx):
     response = requests.get(BASE_URL + "voting/", timeout=5)
     votings = response.json()
-    embed = discord.Embed(title='Votings', color=discord.Color.random())
-    for voting in votings:
+    embeds = format_votings_list(votings)
+    await Paginator.Simple().start(ctx, pages=embeds)
+
+def format_votings_list(votings):
+    embeds = []
+
+    # TODO Make recursive
+    for i in range(len(votings)):
+        counter = i
+        voting = votings[i]
+        embed = discord.Embed(title='Votings', color=discord.Color.random())
         embed.add_field(name=f'{voting["id"]}: {voting["name"]}', value=voting["question"]["desc"], inline=False)
-    await ctx.send(embed=embed)
+        counter += 1
+
+        if i+1 < len(votings):
+            embed.add_field(name=f'{votings[i+1]["id"]}: {votings[i+1]["name"]}', value=votings[i+1]["question"]["desc"], inline=False)
+            counter += 1
+
+            if i+2 < len(votings):
+                embed.add_field(name=f'{votings[i+2]["id"]}: {votings[i+2]["name"]}', value=votings[i+2]["question"]["desc"], inline=False)
+                counter += 1
+
+        embeds.append(embed)
+
+        if counter == len(votings):
+            break
+
+    return embeds
 
 async def post_voting(ctx, reaction, voting, option_id):
     # TODO Post voting result to DECIDE
