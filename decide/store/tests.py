@@ -219,7 +219,7 @@ class StorePrivateTextCase(BaseTestCase):
         self.token = response.json().get('token')
         self.assertTrue(self.token)
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token)
-    
+
     def tearDown(self):
         super().tearDown()
 
