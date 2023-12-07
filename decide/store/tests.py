@@ -244,7 +244,6 @@ class StorePrivateTextCase(BaseTestCase):
         self.assertEqual(response.status_code, 200)
 
         self.assertEqual(Vote.objects.count(), 2)
-    
 
 class StoreDiscordTestCase(BaseTestCase):
 
