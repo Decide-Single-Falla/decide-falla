@@ -164,25 +164,24 @@ def format_votings_list(votings):
     embeds = []
 
     # TODO Make recursive
-    for i in range(len(votings)):
-        counter = i
-        voting = votings[i]
+    counter = 0
+    while(counter < len(votings)):
+        voting = votings[counter]
         embed = discord.Embed(title='Votings', color=discord.Color.random())
         embed.add_field(name=f'{voting["id"]}: {voting["name"]}', value=voting["question"]["desc"], inline=False)
         counter += 1
 
-        if i+1 < len(votings):
-            embed.add_field(name=f'{votings[i+1]["id"]}: {votings[i+1]["name"]}', value=votings[i+1]["question"]["desc"], inline=False)
+        if counter < len(votings):
+            voting = votings[counter]
+            embed.add_field(name=f'{voting["id"]}: {voting["name"]}', value=voting["question"]["desc"], inline=False)
             counter += 1
 
-            if i+2 < len(votings):
-                embed.add_field(name=f'{votings[i+2]["id"]}: {votings[i+2]["name"]}', value=votings[i+2]["question"]["desc"], inline=False)
+            if counter < len(votings):
+                voting = votings[counter]
+                embed.add_field(name=f'{voting["id"]}: {voting["name"]}', value=voting["question"]["desc"], inline=False)
                 counter += 1
 
         embeds.append(embed)
-
-        if counter == len(votings):
-            break
 
     return embeds
 
