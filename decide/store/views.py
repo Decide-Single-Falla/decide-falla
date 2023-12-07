@@ -134,7 +134,7 @@ class DiscordStoreView(generics.CreateAPIView):
         elif not_started or is_closed:
             #print("por aqui 42")
             return Response({"This voting is closed"}, status=status.HTTP_401_UNAUTHORIZED)
-        
+
         bigpk = {
             'p': (voting[0].get('pub_key').get('p')),
             'g': (voting[0].get('pub_key').get('g')),
