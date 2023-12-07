@@ -1,7 +1,5 @@
-from pickle import BININT
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
-from base.models import BigBigField
 import django_filters.rest_framework
 from rest_framework import status
 from rest_framework.response import Response
@@ -122,7 +120,7 @@ class DiscordStoreView(generics.CreateAPIView):
             # print("por aqui 35")
             return Response({}, status=status.HTTP_401_UNAUTHORIZED)
         start_date = voting[0].get('start_date', None)
-        
+
         # print ("Start date: "+  start_date)
         end_date = voting[0].get('end_date', None)
         #print ("End date: ", end_date)
@@ -160,7 +158,7 @@ class DiscordStoreView(generics.CreateAPIView):
     def get_random_integer(max_value):
         bit_length = max_value.bit_length()
         random_num = random.getrandbits(bit_length)
-        return random_num % max_value    
+        return random_num % max_value
     
     def encrypt(pk, m, r=None):
         bits = 256

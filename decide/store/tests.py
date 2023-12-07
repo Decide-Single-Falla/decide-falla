@@ -333,8 +333,8 @@ class StoreDiscordTestCase(BaseTestCase):
         user.save()
         return user
 
-    def test_gen_vote_invalid_voting(self):
-        
+    def test_discord_invalid_voting(self):
+
         votingId = 1
         voterId = 1
         selectedOption = 1
@@ -342,7 +342,7 @@ class StoreDiscordTestCase(BaseTestCase):
         response = self.client.post('/store/discord/{}/{}/{}/'.format(votingId,voterId,selectedOption))
         self.assertEqual(response.status_code, 401)
 
-    def test_gen_vote_invalid_option(self):
+    def test_discord_invalid_option(self):
 
         votingId = 50014
         voterId = 1
@@ -356,7 +356,7 @@ class StoreDiscordTestCase(BaseTestCase):
         response = self.client.post('/store/discord/{}/{}/{}/'.format(votingId,voterId,selectedOption))
         self.assertEqual(response.status_code, 401)
 
-    def test_store_vote(self):
+    def test_discord_store_vote(self):
 
         votingId = 50015
         voterId = 1
@@ -372,7 +372,7 @@ class StoreDiscordTestCase(BaseTestCase):
         self.assertEqual(Vote.objects.first().voting_id, 50015)
         self.assertEqual(Vote.objects.first().voter_id, 1)
 
-    def test_voting_status(self):
+    def test_discord_voting_status(self):
 
         votingId = 50014
         voterId = 1
