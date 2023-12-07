@@ -154,7 +154,6 @@ class DiscordStoreView(generics.CreateAPIView):
         v.save()
 
         return Response({})
-    
     def get_random_integer(max_value):
         bit_length = max_value.bit_length()
         random_num = random.getrandbits(bit_length)
