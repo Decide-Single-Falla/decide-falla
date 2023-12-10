@@ -209,7 +209,7 @@ class StorePrivateTextCase(BaseTestCase):
         )
         self.voting.save()
 
-        user_anonymous = User(username='anonymous')
+        user_anonymous = User(pk = 2, username='anonymous')
         user_anonymous.set_password('tbo12345')
         user_anonymous.save()
 
@@ -225,14 +225,14 @@ class StorePrivateTextCase(BaseTestCase):
 
     def test_store_multiple_private_vote(self):
         dataStore1 = {
-        "voting": 5001,
-        "voter": 1,
-       "vote": { "a": 96, "b": 184 }
+            "voting": 5001,
+            "voter": 2,
+            "vote": { "a": 96, "b": 184 }
         }
 
         dataStore2 = {
             "voting": 5001,
-            "voter": 1,
+            "voter": 2,
             "vote": { "a": 192, "b": 368 }
         }
 
@@ -244,6 +244,18 @@ class StorePrivateTextCase(BaseTestCase):
         self.assertEqual(response.status_code, 200)
 
         self.assertEqual(Vote.objects.count(), 2)
+
+    def test_store_private_other_user(self):
+        
+        dataNotAnonymous = {
+            "voting": 5001,
+            "voter": 1,
+            "vote": { "a": 500, "b": 1000 }
+        }
+
+        response = self.client.post('/store/', dataNotAnonymous, format='json')
+
+        self.assertEqual(response.status_code, 401)
 
 class StoreDiscordTestCase(BaseTestCase):
 
