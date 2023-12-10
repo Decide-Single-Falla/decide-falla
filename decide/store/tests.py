@@ -246,7 +246,7 @@ class StorePrivateTextCase(BaseTestCase):
         self.assertEqual(Vote.objects.count(), 2)
 
     def test_store_private_other_user(self):
-        
+
         dataNotAnonymous = {
             "voting": 5001,
             "voter": 1,
