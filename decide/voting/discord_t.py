@@ -14,7 +14,7 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'decide.settings')
 django.setup()
 
-from .models import Voting
+from .models import Voting, Question, QuestionOption
 
 load_dotenv()
 
@@ -62,8 +62,14 @@ async def bot():
 
 @pytest.fixture
 def voting(db):
-    voting = Voting.objects.create(name="Test Voting", description="This is a test voting")
-    print("Voting created: ", voting)
+    question = Question.objects.create(desc="Question desc")
+    question.save()
+    for i in range(3):
+        option = QuestionOption(question=question, option='option {}'.format(i+1))
+        option.save()
+    voting = Voting.objects.create(name="Test Voting", desc="This is a test voting", question=question)
+    voting.save()
+    print("Voting options: ", voting.question)
     return voting
 
 @pytest.mark.asyncio
@@ -71,8 +77,9 @@ async def test_list_all_votings(bot, voting):
     await dpytest.message("!list_all_votings")
     response = dpytest.get_message()
     embed = response.embeds[0]
+    print("Voting options: ", voting)
     print("Embed es: ", embed)
     print("Embed to dict es: ", embed.to_dict())
     assert embed.title == "Votings"
     # embed is: {'fields': [{'inline': False, 'name': '2: Mejor juego del año', 'value': 'Cual es el mejor juego del año'}, {'inline': False, 'name': '3: peor juego del año', 'value': 'peor juego del año'}, {'inline': False, 'name': '4: voy a aprobar?', 'value': 'voy a aprobar'}], 'color': 16736000, 'type': 'rich', 'title': 'Votings'}
-    # assert embed.
+
