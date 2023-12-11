@@ -2,6 +2,7 @@ from django.db.utils import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
 from .serializers import CensusSerializer
 import django_filters.rest_framework
+from rest_framework import status
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.status import (
@@ -56,9 +57,12 @@ class CensusListView(generics.ListAPIView):
     queryset = Census.objects.all()
     serializer_class = CensusSerializer
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
-    filterset_fields = ('id', )
+    filterset_fields = ('voter_id', )
 
     def get(self, request, voting_id, *args, **kwargs):
         self.queryset = Census.objects.filter(voting_id=voting_id)
-
-        return super().get(request, *args, **kwargs)
+        
+        if len(self.queryset) == 0:
+            return Response({"There is no one in the census or this voting doesn't exist"}, status=status.HTTP_204_NO_CONTENT)
+        else:
+            return super().get(request, *args, **kwargs)
