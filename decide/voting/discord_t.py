@@ -53,32 +53,11 @@ async def bot():
 
 #TODO: Create a votation in the database and test the list_all_votings command
 
-@pytest.mark.asyncio
-async def test_list_all_votings(bot):
-    await dpytest.message("!list_all_votings")
-    title = dpytest.get_embed().title
-    assert "Votings" in title
-
-
-# Fake test
-
-@pytest.mark.asyncio
-async def test_embed_peek(bot):
-    guild = bot.guilds[0]
-    channel = guild.text_channels[0]
-
-    embed = discord.Embed(title="Test Embed")
-    embed.add_field(name="Field 1", value="Lorem ipsum")
-
-    embed2 = embed = discord.Embed(title="Test Embed")
-    embed2.add_field(name="Field 1", value="Lorem ipsum")
-
-    await channel.send(embed=embed)
-
-    # peek option doesn't remove the message fro the queue
-    assert dpytest.verify().message().peek().embed(embed2)
-    # verify_embed (without peek) WILL remove emebd from the queue
-    assert dpytest.verify().message().embed(embed2)    
+# @pytest.mark.asyncio
+# async def test_list_all_votings(bot):
+#     await dpytest.message("!list_all_votings")
+#     title = dpytest.get_embed().title
+#     assert "Votings" in title
 
 
 @pytest.fixture
@@ -88,7 +67,7 @@ def voting(db):
     return voting
 
 @pytest.mark.asyncio
-async def test_list_all_votings(bot):
+async def test_list_all_votings(bot, voting):
     await dpytest.message("!list_all_votings")
     response = dpytest.get_message()
     embed = response.embeds[0]
