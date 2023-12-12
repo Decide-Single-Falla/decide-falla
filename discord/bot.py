@@ -4,9 +4,11 @@ import json
 import asyncio
 
 import discord
-#import Paginator
+import Paginator
 import requests
+
 import utils.formatter as Formatter
+from utils.help import help_command
 
 from discord.ext import commands
 from dotenv import load_dotenv
@@ -28,7 +30,8 @@ DECIDE_MODE = os.getenv('DECIDE_MODE') == 'TRUE'
 GEN_DB_FLAG = False
 
 bot = commands.Bot(command_prefix='!', intents=discord.Intents.all())
-#bot.remove_command('help')
+bot.remove_command('help')
+
 if DEV_MODE:
     test_votes = json.load(open('dev_templates/votes.json', 'r'))["votes"]
 
@@ -73,7 +76,7 @@ async def on_command_error(ctx, error):
     if DEV_MODE:
         message += f'\n{error}'
     else:
-        message += 'An error has occurred, please try again!'
+        message += 'An error has occurred.\nIf you want to know the available commands, use !help'
 
     print(error)
     await ctx.send(message)
@@ -84,21 +87,26 @@ async def on_command_error(ctx, error):
 async def hello(ctx):
     await ctx.send("Hello!")
 
-@bot.command(name="get_votes", help="Get help")
-async def get_votes(ctx):
-    #response = requests.get(base_url + "voting/")
-    #votings = response.json()
-    votings = test_votes
+@bot.command(name="help", help="Get help")
+async def help(ctx, *args):
+    if len(args) == 0:
+        embed = discord.Embed(title="List of commands", color=0x00ff00)
+        embed.add_field(name="", value="If you need to know more about a command, use !help <command>", inline=False)
+        for command in bot.commands:
+            if command.name != "help":
+                embed.add_field(name=command.name, value=command.help, inline=False)
+        await ctx.send(embed=embed)
+    else:
+        bot_command = None
+        for command in bot.commands:
+            if command.name == args[0]:
+                bot_command = command
+                break
 
-    embed = discord.Embed(title='Votings', color=discord.Color.random())
-
-    for voting in votings:
-        #if voting["start_date"] is not None and voting["end_date"] is None and voting["public"]:
-        #    embed.add_field(name=f'{voting["id"]}: {voting["name"]}', value=voting["question"]["desc"], inline=False)
-        embed.add_field(name=f'{voting["id"]}: {voting["title"]}', value=voting["description"], inline=False)
-
-    print(f"{ctx.author} requested the list of votings")
-    await ctx.send(embed=embed)
+        if bot_command is None:
+            await ctx.send("Command not found")
+        else:
+            await help_command(ctx, bot_command)
 
 @bot.command(name="get_voting", help="Get a voting")
 async def get_voting(ctx, *args):
@@ -150,21 +158,40 @@ async def get_voting(ctx, *args):
 async def list_active_votings(ctx):
     response = requests.get(BASE_URL + "voting/", timeout=5)
     votings = response.json()
+    embeds = format_votings_list(votings)
+    await Paginator.Simple().start(ctx, pages=embeds)
 
-    embed = discord.Embed(title='Active votings', color=discord.Color.random())
-    for voting in votings:
-        if voting["start_date"] and voting["pub_key"] and voting["end_date"] is None:
-            embed.add_field(name=f'{voting["id"]}: {voting["name"]}', value=voting["question"]["desc"], inline=False)
-    await ctx.send(embed=embed)
-
-@bot.command(name="list_all_votings", help="List all votings")
+@bot.command(name="list_all_votings", help="List active votings")
 async def list_all_votings(ctx):
     response = requests.get(BASE_URL + "voting/", timeout=5)
     votings = response.json()
-    embed = discord.Embed(title='Votings', color=discord.Color.random())
-    for voting in votings:
+    embeds = format_votings_list(votings)
+    await Paginator.Simple().start(ctx, pages=embeds)
+
+def format_votings_list(votings):
+    embeds = []
+
+    # TODO Make recursive
+    counter = 0
+    while (counter < len(votings)):
+        voting = votings[counter]
+        embed = discord.Embed(title='Votings', color=discord.Color.random())
         embed.add_field(name=f'{voting["id"]}: {voting["name"]}', value=voting["question"]["desc"], inline=False)
-    await ctx.send(embed=embed)
+        counter += 1
+
+        if counter < len(votings):
+            voting = votings[counter]
+            embed.add_field(name=f'{voting["id"]}: {voting["name"]}', value=voting["question"]["desc"], inline=False)
+            counter += 1
+
+            if counter < len(votings):
+                voting = votings[counter]
+                embed.add_field(name=f'{voting["id"]}: {voting["name"]}', value=voting["question"]["desc"], inline=False)
+                counter += 1
+
+        embeds.append(embed)
+
+    return embeds
 
 async def post_voting(ctx, reaction, voting, option_id):
     # TODO Post voting result to DECIDE
