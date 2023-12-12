@@ -49,16 +49,6 @@ async def bot():
     # Teardown
     await dpytest.empty_queue() # empty the global message queue as test teardown
 
-############# TEST ############# DONE
-
-#TODO: Create a votation in the database and test the list_all_votings command
-
-# @pytest.mark.asyncio
-# async def test_list_all_votings(bot):
-#     await dpytest.message("!list_all_votings")
-#     title = dpytest.get_embed().title
-#     assert "Votings" in title
-
 
 @pytest.fixture
 def voting(db):
@@ -77,9 +67,5 @@ async def test_list_all_votings(bot, voting):
     await dpytest.message("!list_all_votings")
     response = dpytest.get_message()
     embed = response.embeds[0]
-    print("Voting options: ", voting)
-    print("Embed es: ", embed)
-    print("Embed to dict es: ", embed.to_dict())
     assert embed.title == "Votings"
-    # embed is: {'fields': [{'inline': False, 'name': '2: Mejor juego del año', 'value': 'Cual es el mejor juego del año'}, {'inline': False, 'name': '3: peor juego del año', 'value': 'peor juego del año'}, {'inline': False, 'name': '4: voy a aprobar?', 'value': 'voy a aprobar'}], 'color': 16736000, 'type': 'rich', 'title': 'Votings'}
 
