@@ -157,7 +157,7 @@ async def get_voting(ctx, *args):
 @bot.command(name="list_active_votings", help="List all votings")
 async def list_active_votings(ctx):
     response = requests.get(BASE_URL + "voting/", timeout=5)
-    votings = response.json()   
+    votings = response.json()
     embeds = format_votings_list(votings)
     await Paginator.Simple().start(ctx, pages=embeds)
 
@@ -173,7 +173,7 @@ def format_votings_list(votings):
 
     # TODO Make recursive
     counter = 0
-    while(counter < len(votings)):
+    while (counter < len(votings)):
         voting = votings[counter]
         embed = discord.Embed(title='Votings', color=discord.Color.random())
         embed.add_field(name=f'{voting["id"]}: {voting["name"]}', value=voting["question"]["desc"], inline=False)
