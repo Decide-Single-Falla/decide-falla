@@ -217,6 +217,12 @@ class VotingTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json(), 'Voting already tallied')
 
+    def test_details_voting(self):
+
+        votingId = self.create_voting().pk
+        response = self.client.get('/voting/details/{}/'.format(votingId), format = 'json')
+        self.assertEqual(response.status_code, 200)
+
 class LogInSuccessTests(StaticLiveServerTestCase):
 
     def setUp(self):
