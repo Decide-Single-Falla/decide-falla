@@ -61,7 +61,6 @@ class StoreView(generics.ListAPIView):
 
             if (uid != 2):
                 return Response({}, status=status.HTTP_401_UNAUTHORIZED)
-            
             a = vote.get("a")
             b = vote.get("b")
 
