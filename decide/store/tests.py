@@ -366,4 +366,5 @@ class StoreDiscordTestCase(BaseTestCase):
         self.voting.end_date = timezone.now() - datetime.timedelta(days=1)
         self.voting.save()
         response = self.client.post('/store/discord/{}/{}/{}/'.format(votingId,voterId,selectedOption))
+
         self.assertEqual(response.status_code, 401)
