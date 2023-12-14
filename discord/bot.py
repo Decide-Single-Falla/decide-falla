@@ -154,6 +154,7 @@ async def get_voting(ctx, *args):
         await post_voting(ctx, reaction, voting, emotes.index(reaction[0].emoji) - 1)
         return
 
+# We will retrieve the voting from the data base using the id. f.e !get_voting_by_id 2
 @bot.command(name="get_voting_by_id", help="Get a voting by ID")
 async def get_voting_by_id(ctx, *args):
     if len(args) == 0:
