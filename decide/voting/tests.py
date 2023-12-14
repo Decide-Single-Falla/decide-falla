@@ -238,14 +238,11 @@ class VotingTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json(), 'Voting already tallied')
 
-<<<<<<< Updated upstream
-=======
     def test_details_voting(self):
 
         votingId = self.create_voting().pk
         response = self.client.get('/voting/details/{}/'.format(votingId), format = 'json')
         self.assertEqual(response.status_code, 200)
-
 
 class Misc(Cog):
     @command()
@@ -292,7 +289,6 @@ class Misc(Cog):
         assert embed.fields[0].name == "2: Votación para el bot"
     
 
->>>>>>> Stashed changes
 class LogInSuccessTests(StaticLiveServerTestCase):
 
     def setUp(self):
