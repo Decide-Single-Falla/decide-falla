@@ -154,6 +154,30 @@ async def get_voting(ctx, *args):
         await post_voting(ctx, reaction, voting, emotes.index(reaction[0].emoji) - 1)
         return
 
+@bot.command(name="get_voting_by_id", help="Get a voting by ID")
+async def get_voting_by_id(ctx, *args):
+    if len(args) == 0:
+        await ctx.send("Please provide a voting ID!")
+        return
+
+    voting_id = int(args[0])
+    response = requests.get(BASE_URL + "voting/details/" + str(voting_id) + "/", timeout=5)
+    voting = response.json()
+
+    embed = discord.Embed(title=voting["name"], color=discord.Color.random())
+    
+    # embed.add_field(name=voting["question"]["desc"], value=voting["question"]["options"], inline=False)
+    
+    votation_name = str(voting["question"]["desc"])
+    options = voting["question"]["options"]
+    options_str = ""
+    for option in options:
+    options_str += f"{option['number']}. {option['option']}\n"
+
+    embed.add_field(name=votation_name, value=options_str, inline=False)
+
+    await ctx.send(embed=embed)
+
 @bot.command(name="list_active_votings", help="List all votings")
 async def list_active_votings(ctx):
     response = requests.get(BASE_URL + "voting/", timeout=5)
