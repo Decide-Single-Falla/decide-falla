@@ -13,7 +13,8 @@
       "Chore: ",
       "Sync: ",
       "Release",
-      "Sync Staging"
+      "Sync Staging",
+      "Test"
     ],
     "regexp": "docs\\(v[0-9]\\): ",
     "regexpFlags": "i"
