@@ -23,7 +23,6 @@ from mixnet.models import Auth
 from voting.models import Voting, Question, QuestionOption
 from datetime import datetime
 
-
 class VotingTestCase(BaseTestCase):
 
     def setUp(self):
@@ -222,6 +221,7 @@ class VotingTestCase(BaseTestCase):
         votingId = self.create_voting().pk
         response = self.client.get('/voting/details/{}/'.format(votingId), format = 'json')
         self.assertEqual(response.status_code, 200)
+
 
 class LogInSuccessTests(StaticLiveServerTestCase):
 

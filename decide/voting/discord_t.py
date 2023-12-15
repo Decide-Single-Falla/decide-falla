@@ -8,14 +8,6 @@ import discord.ext.test as dpytest
 from discord import Embed, Color
 from dotenv import load_dotenv
 
-import os
-import django
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'decide.settings')
-django.setup()
-
-from .models import Voting, Question, QuestionOption
-
 load_dotenv()
 
 BASE_URL = 'http://localhost:8000/'
@@ -49,23 +41,14 @@ async def bot():
     # Teardown
     await dpytest.empty_queue() # empty the global message queue as test teardown
 
+############# WORKING TESTS ############# 
 
-@pytest.fixture
-def voting(db):
-    question = Question.objects.create(desc="Question desc")
-    question.save()
-    for i in range(3):
-        option = QuestionOption(question=question, option='option {}'.format(i+1))
-        option.save()
-    voting = Voting.objects.create(name="Test Voting", desc="This is a test voting", question=question)
-    voting.save()
-    print("Voting options: ", voting.question)
-    return voting
+# Para ejecutar este test debemos situarnos en la ruta del test y ejecutar 'pytest discord_t.py'
 
 @pytest.mark.asyncio
-async def test_list_all_votings(bot, voting):
+async def test_embed_votings_creation(bot):
     await dpytest.message("!list_all_votings")
     response = dpytest.get_message()
     embed = response.embeds[0]
+    print("Embed to dict: ", embed.to_dict())
     assert embed.title == "Votings"
-
