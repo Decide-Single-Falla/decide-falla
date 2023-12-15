@@ -18,6 +18,9 @@ class VisualizerTestCase(StaticLiveServerTestCase):
     def setUp(self):
         self.base = BaseTestCase()
         self.base.setUp()
+        options = webdriver.ChromeOptions()
+        options.headless = False
+        self.driver = webdriver.Chrome(options=options)
 
         self.q = Question(desc='test question')
         self.q.save()
@@ -53,10 +56,6 @@ class VisualizerTestCase(StaticLiveServerTestCase):
         # In order to tally the votes, an admin must be logged and he must execute the task 'tally'
         self.base.login('decide', 'decide')
         self.v.tally_votes()
-
-        options = webdriver.ChromeOptions()
-        options.headless = False
-        self.driver = webdriver.Chrome(options=options)
 
         super().setUp()
 
