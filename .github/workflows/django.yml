@@ -12,7 +12,6 @@ on:
 
 jobs:
 
-  jobs:
   PrTitleChecker:
     if: |
       github.event_name == 'pull_request'
@@ -23,7 +22,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           pass_on_octokit_error: false
           configuration_path: ".github/pr-title-checker-config.json"
-          
+
   build:
     strategy:
       matrix:
