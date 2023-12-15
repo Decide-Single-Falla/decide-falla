@@ -7,6 +7,7 @@ from discord.ext.commands import Cog, command
 import discord.ext.test as dpytest
 from discord import Embed, Color
 from dotenv import load_dotenv
+from voting.models import Voting, Question, QuestionOption
 
 load_dotenv()
 
