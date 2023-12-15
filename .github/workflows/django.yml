@@ -10,14 +10,13 @@ on:
       - master
       - develop
 
-permissions: write-all
-
 jobs:
 
   PrTitleChecker:
     if: |
       github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    permissions: write-all
     steps:
       - uses: thehanimo/pr-title-checker@v1.4.0
         with:
