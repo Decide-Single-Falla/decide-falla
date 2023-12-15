@@ -113,7 +113,6 @@ async def get_voting(ctx, *args):
     # TODO LIST
     # Message others when they react
     # Delete or lock message after time ?
-    # BASE_URL + discord/<int:voting_id>/<int:voter_id>/<int:selectedOption>/ , timeout=5
 
     if len(args) == 0:
         await ctx.send("Please provide a voting ID!")
@@ -166,19 +165,33 @@ async def get_voting_by_id(ctx, *args):
     response = requests.get(BASE_URL + "voting/details/" + str(voting_id) + "/", timeout=5)
     voting = response.json()
 
+    def check(r: discord.Reaction, u: Union[discord.Member, discord.User]):
+        return u.id == ctx.author.id and r.message.channel.id == ctx.channel.id and r.message.id == msg.id and \
+               emotes.index(str(r.emoji)) - 1 < counter
+
     embed = discord.Embed(title=voting["name"], color=discord.Color.random())
-    
-    # embed.add_field(name=voting["question"]["desc"], value=voting["question"]["options"], inline=False)
-    
-    votation_name = str(voting["question"]["desc"])
+
+    emotes = ["0️⃣","1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+
+    counter = 1
     options = voting["question"]["options"]
-    options_str = ""
     for option in options:
-    options_str += f"{option['number']}. {option['option']}\n"
+        embed.add_field(name=emotes[counter], value=f"{option['number']}. {option['option']}", inline=False)
+        counter += 1
 
-    embed.add_field(name=votation_name, value=options_str, inline=False)
+    msg = await ctx.send(embed=embed)
 
-    await ctx.send(embed=embed)
+    for i in range(1,counter):
+        await msg.add_reaction(emotes[i])
+
+    try:
+        reaction = await bot.wait_for('reaction_add', check = check, timeout = 60.0)
+    except asyncio.TimeoutError:
+        await ctx.send(f"**{ctx.author}**, you didnt react correctly with within 60 seconds.")
+        return
+    else:
+        await post_voting(ctx, reaction, voting, emotes.index(reaction[0].emoji) - 1)
+        return
 
 @bot.command(name="list_active_votings", help="List all votings")
 async def list_active_votings(ctx):
@@ -219,9 +232,25 @@ def format_votings_list(votings):
 
     return embeds
 
-async def post_voting(ctx, reaction, voting, option_id):
-    # TODO Post voting result to DECIDE
-    return await ctx.send(f"{ctx.author} answered option {str(reaction[0].emoji)}")
+async def post_voting(ctx, reaction, voting, selected_option):
+    voter_id = ctx.author.id
+    voting_id = voting["id"]
+    selected_option = selected_option
+
+    print("Voter_id es: ", voter_id)
+    print("Voting_id es: ", voting_id)
+    print("Selected_option es: ", selected_option)
+
+    url = BASE_URL + f"store/discord/{voting_id}/{voter_id}/{selected_option}/"
+    response = requests.post(url, timeout=5)
+    print("Url es: ", url)
+    print("Response es: ", response)
+    print("Status code es: ", response.status_code)
+    
+    if response.status_code == 200:
+        await ctx.send(f"**{ctx.author}**, your vote has been recorded. You voted for option {str(reaction[0].emoji)}")
+    else:
+        await ctx.send(f"**{ctx.author}**, there was an error recording your vote.")
 
 ### --- Run Bot --- ###
 
