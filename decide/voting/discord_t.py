@@ -43,9 +43,6 @@ async def bot():
 
 ############# TEST ############# DONE
 
-<<<<<<< Updated upstream
-#TODO: Create a votation in the database and test the list_all_votings command
-=======
 from asgiref.sync import async_to_sync
 # Get all votings from the database
 @async_to_sync
@@ -63,18 +60,11 @@ def voting(django_db_setup, django_db_blocker):
         for votingg in votings:
             print("Voting: ", votingg)
         return voting
->>>>>>> Stashed changes
 
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
 async def test_list_all_votings(bot):
     await dpytest.message("!list_all_votings")
-<<<<<<< Updated upstream
-    title = dpytest.get_embed().title
-    assert "Votings" in title
-
-    
-=======
     response = dpytest.get_message()
     embed = response.embeds[0]
     print("Embed: ", embed)
@@ -83,4 +73,3 @@ async def test_list_all_votings(bot):
     print("Embed to dict: ", embed.to_dict())
     assert embed.title == "Votings"
     assert embed.fields[0].name == "2: Votación para el bot"
->>>>>>> Stashed changes

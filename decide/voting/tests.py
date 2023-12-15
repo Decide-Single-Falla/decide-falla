@@ -23,28 +23,6 @@ from mixnet.models import Auth
 from voting.models import Voting, Question, QuestionOption
 from datetime import datetime
 
-# imports de discord
-import discord
-import requests
-import pytest
-import pytest_asyncio
-from discord.ext import commands
-from discord.ext.commands import Cog, command
-import discord.ext.test as dpytest
-from discord import Embed, Color
-from dotenv import load_dotenv
-
-# yo que se ya por probar
-import os
-import django
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'decide.settings')
-django.setup()
-
-load_dotenv()
-
-BASE_URL = 'http://localhost:8000/'
-
 class VotingTestCase(BaseTestCase):
 
     def setUp(self):
@@ -112,28 +90,28 @@ class VotingTestCase(BaseTestCase):
                 mods.post('store', json=data)
         return clear
 
-    # def test_complete_voting(self):
-    #     v = self.create_voting()
-    #     self.create_voters(v)
+    def test_complete_voting(self):
+        v = self.create_voting()
+        self.create_voters(v)
 
-    #     v.create_pubkey()
-    #     v.start_date = timezone.now()
-    #     v.save()
+        v.create_pubkey()
+        v.start_date = timezone.now()
+        v.save()
 
-    #     clear = self.store_votes(v)
+        clear = self.store_votes(v)
 
-    #     self.login()  # set token
-    #     v.tally_votes(self.token)
+        self.login()  # set token
+        v.tally_votes(self.token)
 
-    #     tally = v.tally
-    #     tally.sort()
-    #     tally = {k: len(list(x)) for k, x in itertools.groupby(tally)}
+        tally = v.tally
+        tally.sort()
+        tally = {k: len(list(x)) for k, x in itertools.groupby(tally)}
 
-    #     for q in v.question.options.all():
-    #         self.assertEqual(tally.get(q.number, 0), clear.get(q.number, 0))
+        for q in v.question.options.all():
+            self.assertEqual(tally.get(q.number, 0), clear.get(q.number, 0))
 
-    #     for q in v.postproc:
-    #         self.assertEqual(tally.get(q["number"], 0), q["votes"])
+        for q in v.postproc:
+            self.assertEqual(tally.get(q["number"], 0), q["votes"])
 
     def test_create_voting_from_api(self):
         data = {'name': 'Example'}
@@ -238,8 +216,6 @@ class VotingTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json(), 'Voting already tallied')
 
-<<<<<<< Updated upstream
-=======
     def test_details_voting(self):
 
         votingId = self.create_voting().pk
@@ -247,52 +223,6 @@ class VotingTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 200)
 
 
-class Misc(Cog):
-    @command()
-    async def list_all_votings(self, ctx):
-        response = requests.get(BASE_URL + "voting/", timeout=5)
-        votings = response.json()
-        embed = Embed(title='Votings', color=Color.random())
-        for voting in votings:
-            embed.add_field(name=f'{voting["id"]}: {voting["name"]}',
-                             value=voting["question"]["desc"], inline=False)
-        await ctx.send(embed=embed)
-
-    @pytest_asyncio.fixture
-    async def bot():
-        # Setup
-        intents = discord.Intents.default()
-        intents.members = True
-        intents.message_content = True
-        b = commands.Bot(command_prefix="!",
-                        intents=intents)
-        await b._async_setup_hook()
-        await b.add_cog(Misc())
-
-        dpytest.configure(b)
-
-        yield b
-
-        # Teardown
-        await dpytest.empty_queue() # empty the global message queue as test teardown
-
-
-    #Vamos a probar a mover aquí el test de discord
-    @pytest.mark.django_db(transaction=True)
-    @pytest.mark.asyncio
-    async def test_list_all_votings(bot):
-        await dpytest.message("!list_all_votings")
-        response = dpytest.get_message()
-        embed = response.embeds[0]
-        print("Embed: ", embed)
-        print("Voting es: ", voting)
-        print("Votación por parametro: ", voting.question.desc)
-        print("Embed to dict: ", embed.to_dict())
-        assert embed.title == "Votings"
-        assert embed.fields[0].name == "2: Votación para el bot"
-    
-
->>>>>>> Stashed changes
 class LogInSuccessTests(StaticLiveServerTestCase):
 
     def setUp(self):
