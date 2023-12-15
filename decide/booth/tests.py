@@ -100,6 +100,9 @@ class PrivateVotingBoothTestCase(StaticLiveServerTestCase):
     def setUp(self):
         self.base = BaseTestCase()
         self.base.setUp()
+        options = webdriver.ChromeOptions()
+        options.headless = False
+        self.driver = webdriver.Chrome(options=options)
 
         self.q = Question(desc='test question')
         self.q.save()
@@ -123,10 +126,6 @@ class PrivateVotingBoothTestCase(StaticLiveServerTestCase):
         self.user = User(username='notanonymous')
         self.user.set_password('qwerty12345')
         self.user.save()
-
-        options = webdriver.ChromeOptions()
-        options.headless = False
-        self.driver = webdriver.Chrome(options=options)
 
         super().setUp()
 
