@@ -2,7 +2,8 @@
   "CHECKS": {
     "ignoreLabels": [
       "dont-check-PRs-with-this-label",
-      "meta"
+      "meta",
+      "ignore"
     ],
     "prefixes": [
       "Hotfix: ",
