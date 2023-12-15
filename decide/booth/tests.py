@@ -8,6 +8,7 @@ from mixnet.models import Auth
 from django.conf import settings
 
 from voting.models import Voting, Question, QuestionOption
+from store.models import Vote
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -93,3 +94,75 @@ class SeleniumBoothTestCase(StaticLiveServerTestCase):
         time.sleep(1)
         vState= self.driver.find_element(By.CSS_SELECTOR,".alert-success").text
         self.assertTrue(vState, 'Congratulations. Your vote has been sent')
+
+class PrivateVotingBoothTestCase(StaticLiveServerTestCase):
+
+    def setUp(self):
+        self.base = BaseTestCase()
+        self.base.setUp()
+        options = webdriver.ChromeOptions()
+        options.headless = True
+        self.driver = webdriver.Chrome(options=options)
+
+        self.q = Question(desc='test question')
+        self.q.save()
+        self.v = Voting(name='test voting', question=self.q, private=True)
+        self.v.save()
+        a, _ = Auth.objects.get_or_create(url=settings.BASEURL,
+                                          defaults={'me': True, 'name': 'test auth'})
+        a.save()
+        self.v.auths.add(a)
+        self.v.create_pubkey()
+        self.v.start_date = timezone.now()
+        self.v.save()
+        
+        self.questionOption = QuestionOption(question = self.q, number = 1, option = 'Booth test option')
+        self.questionOption.save()
+
+        self.anonymousUser = User(pk=2 ,username='anonymous')
+        self.anonymousUser.set_password('tbo12345')
+        self.anonymousUser.save()
+
+        self.user = User(username='notanonymous')
+        self.user.set_password('qwerty12345')
+        self.user.save()
+
+        super().setUp()
+
+    def tearDown(self):
+        super().tearDown()
+        self.driver.quit()
+        self.base.tearDown()
+
+    def test_private_booth_success(self):
+
+        # By default, the view should do this to let the user vote, but its not done in the test
+        self.base.login('anonymous', 'tbo12345')
+
+        self.driver.get(f'{self.live_server_url}/booth/{self.v.pk}/')
+        time.sleep(1)
+        self.driver.find_element(By.ID, "q1").click()
+        self.driver.find_element(By.XPATH, "//*[@id='app-booth']/div/div[2]/div/button").click()
+        time.sleep(1)
+
+        vState = self.driver.find_element(By.CSS_SELECTOR,".alert-success").text
+        self.assertTrue(vState, 'Congratulations. Your vote has been sent')
+
+    def test_private_booth_other_user(self):
+
+        # In case the user is logged because he done other voting o by the method
+        self.base.login('notanonymous', 'qwerty12345')
+
+        self.driver.get(f'{self.live_server_url}/booth/{self.v.pk}/')
+        time.sleep(1)
+        self.driver.find_element(By.ID, "q1").click()
+        self.driver.find_element(By.XPATH, "//*[@id='app-booth']/div/div[2]/div/button").click()
+        time.sleep(1)
+
+        vState = self.driver.find_element(By.CSS_SELECTOR,".alert-success").text
+        self.assertTrue(vState, 'Congratulations. Your vote has been sent')
+
+        self.assertEqual(Vote.objects.count(), 1)
+        vote = Vote.objects.last()
+        # The private voting should have logged out and logged in with the anonymous user
+        self.assertEqual(vote.voter_id, self.anonymousUser.pk)
