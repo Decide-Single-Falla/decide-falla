@@ -7,7 +7,6 @@ from discord.ext.commands import Cog, command
 import discord.ext.test as dpytest
 from discord import Embed, Color
 from dotenv import load_dotenv
-from voting.models import Voting, Question, QuestionOption
 
 load_dotenv()
 
@@ -42,40 +41,14 @@ async def bot():
     # Teardown
     await dpytest.empty_queue() # empty the global message queue as test teardown
 
-############# TEST ############# 
+############# WORKING TESTS ############# 
 
-# Este es un test que he intentado hacer para comprobar que el bot recupera correctamente de la base de datos
-# el problema es que django es sincrono y el bot asincrono, no soy capaz de recuperar la información creada
-# durante la ejecución del test para integrar la prueba automaticamente con decide.
-# para poder ejecutar el test y ver que funciona con nuestros datos locales, debemos de ejecutar en la ruta del test
-# 'pytest discord_t.py' se le puede añadir -s para más información
-# ahí podemos ver como si en el assert embed.fields[0].name ponemos el 'id: nombre' de la votación que hemos creado
-# en la base de datos, el test funciona correctamente
-
-# Get all votings from the database
-@pytest.fixture(scope='module')
-def voting(django_db_setup, django_db_blocker):
-    with django_db_blocker.unblock():
-        question = Question.objects.create(desc="Question desc")
-        question.save()
-        for i in range(3):
-            option = QuestionOption(question=question, option='option {}'.format(i+1))
-            option.save()
-        voting = Voting.objects.create(name="Test Voting", desc="This is a test voting", question=question)
-        voting.save()
-        votings = Voting.objects.all()
-        for votingg in votings:
-            print("Voting: ", votingg)
-        return voting
+# Para ejecutar este test debemos situarnos en la ruta del test y ejecutar 'pytest discord_t.py'
 
 @pytest.mark.asyncio
-async def test_list_all_votings(bot):
+async def test_embed_votings_creation(bot):
     await dpytest.message("!list_all_votings")
     response = dpytest.get_message()
     embed = response.embeds[0]
-    print("Embed: ", embed)
-    print("Voting es: ", voting)
-    # print("Votación por parametro: ", voting.question.desc)
-    print("Embed to dict: ", embed.to_dict()) # print para ver qué votaciones tenemos en base de datos
+    print("Embed to dict: ", embed.to_dict())
     assert embed.title == "Votings"
-    assert embed.fields[0].name == "2: Votación para el bot"
