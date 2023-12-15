@@ -113,6 +113,7 @@ async def get_voting(ctx, *args):
     # TODO LIST
     # Message others when they react
     # Delete or lock message after time ?
+    # BASE_URL + discord/<int:voting_id>/<int:voter_id>/<int:selectedOption>/ , timeout=5
 
     if len(args) == 0:
         await ctx.send("Please provide a voting ID!")
