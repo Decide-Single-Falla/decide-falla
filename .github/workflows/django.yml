@@ -11,6 +11,19 @@ on:
       - develop
 
 jobs:
+
+  jobs:
+  PrTitleChecker:
+    if: |
+      github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: thehanimo/pr-title-checker@v1.4.0
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          pass_on_octokit_error: false
+          configuration_path: ".github/pr-title-checker-config.json"
+          
   build:
     strategy:
       matrix:
@@ -36,10 +49,6 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: ${{matrix.pyversion}}
-    - name: Copy pr-title-checker-config.json
-      run: cp ../pr-title-checker-config.json .
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: psycopg2 prerequisites
       run: sudo apt-get install libpq-dev
     - name: Install dependencies and config
