@@ -10,8 +10,7 @@ on:
       - master
       - develop
 
-permissions:
-  pull-requests: write-all
+permissions: write-all
 
 jobs:
 
