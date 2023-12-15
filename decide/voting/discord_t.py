@@ -41,11 +41,17 @@ async def bot():
     # Teardown
     await dpytest.empty_queue() # empty the global message queue as test teardown
 
-############# TEST ############# DONE
+############# TEST ############# 
 
-from asgiref.sync import async_to_sync
+# Este es un test que he intentado hacer para comprobar que el bot recupera correctamente de la base de datos
+# el problema es que django es sincrono y el bot asincrono, no soy capaz de recuperar la información creada
+# durante la ejecución del test para integrar la prueba automaticamente con decide.
+# para poder ejecutar el test y ver que funciona con nuestros datos locales, debemos de ejecutar en la ruta del test
+# 'pytest discord_t.py' se le puede añadir -s para más información
+# ahí podemos ver como si en el assert embed.fields[0].name ponemos el 'id: nombre' de la votación que hemos creado
+# en la base de datos, el test funciona correctamente
+
 # Get all votings from the database
-@async_to_sync
 @pytest.fixture(scope='module')
 def voting(django_db_setup, django_db_blocker):
     with django_db_blocker.unblock():
@@ -61,7 +67,6 @@ def voting(django_db_setup, django_db_blocker):
             print("Voting: ", votingg)
         return voting
 
-@pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
 async def test_list_all_votings(bot):
     await dpytest.message("!list_all_votings")
@@ -69,7 +74,7 @@ async def test_list_all_votings(bot):
     embed = response.embeds[0]
     print("Embed: ", embed)
     print("Voting es: ", voting)
-    print("Votación por parametro: ", voting.question.desc)
-    print("Embed to dict: ", embed.to_dict())
+    # print("Votación por parametro: ", voting.question.desc)
+    print("Embed to dict: ", embed.to_dict()) # print para ver qué votaciones tenemos en base de datos
     assert embed.title == "Votings"
     assert embed.fields[0].name == "2: Votación para el bot"
