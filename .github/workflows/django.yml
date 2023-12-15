@@ -16,6 +16,8 @@ jobs:
     if: |
       github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    permissions:
+      - pull-requests:read
     steps:
       - uses: thehanimo/pr-title-checker@v1.4.0
         with:
