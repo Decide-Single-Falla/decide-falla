@@ -163,6 +163,6 @@ class PrivateVotingBoothTestCase(StaticLiveServerTestCase):
         self.assertTrue(vState, 'Congratulations. Your vote has been sent')
 
         self.assertEqual(Vote.objects.count(), 1)
-        vote = Vote.objects.get(id = 1)
+        vote = Vote.objects.last()
         # The private voting should have logged out and logged in with the anonymous user
         self.assertEqual(vote.voter_id, self.anonymousUser.pk)

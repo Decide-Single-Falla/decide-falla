@@ -66,7 +66,7 @@ class VisualizerTestCase(StaticLiveServerTestCase):
     def test_simpleVisualizer(self):
         self.driver.get(f'{self.live_server_url}/visualizer/{self.v.pk}/')
         vState = self.driver.find_element(By.XPATH,"//*[@id='app-visualizer']/div/h1").text
-        self.assertEqual(vState, "1 - " + self.v.name)
+        self.assertEqual(vState, str(self.v.pk) + " - " + self.v.name)
 
         voteNumber = self.driver.find_element(By.XPATH, "//*[@id='app-visualizer']/div/div/table/tbody/tr[1]/td[2]").text
         self.assertEqual(int(voteNumber), 1)
