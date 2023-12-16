@@ -24,6 +24,7 @@ BASE_URL = os.getenv('BASE_URL')
 ### --- Bot Initialization --- ###
 
 TOKEN = os.getenv('DISCORD_TOKEN')
+# client = discord.Client(token=TOKEN)
 DEV_MODE = os.getenv('DEV_MODE') == 'TRUE'
 DECIDE_MODE = os.getenv('DECIDE_MODE') == 'TRUE'
 
@@ -233,15 +234,21 @@ def format_votings_list(votings):
     return embeds
 
 async def post_voting(ctx, reaction, voting, selected_option):
-    voter_id = ctx.author.id
+    discord_voter_id = ctx.author.id
     voting_id = voting["id"]
     selected_option = selected_option
 
-    print("Voter_id es: ", voter_id)
+    print("ctx es: ", ctx)
+    print("ctx_autor es: ", ctx.author)
+
+    print("Voter_id es: ", discord_voter_id)
+    # voter_id = 1
     print("Voting_id es: ", voting_id)
     print("Selected_option es: ", selected_option)
 
-    url = BASE_URL + f"store/discord/{voting_id}/{voter_id}/{selected_option}/"
+    await private_message_to_login(ctx, discord_voter_id, msg="Hello")
+
+    url = BASE_URL + f"store/discord/{voting_id}/{discord_voter_id}/{selected_option}/"
     response = requests.post(url, timeout=5)
     print("Url es: ", url)
     print("Response es: ", response)
@@ -252,6 +259,18 @@ async def post_voting(ctx, reaction, voting, selected_option):
     else:
         await ctx.send(f"**{ctx.author}**, there was an error recording your vote.")
 
+intents = discord.Intents.default()
+intents.message_content = True
+
+client = discord.Client(intents=intents)
+
+# @client.command(pass_context=True)
+async def private_message_to_login(ctx,userid:str,msg):
+        # print("ctx.user es: ", ctx.user)
+        print("user id eS: ", userid)
+        user = client.get_user(userid)
+        print("user es: ", user)
+        await user.send('👀')
 ### --- Run Bot --- ###
 
 bot.run(TOKEN)

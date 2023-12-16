@@ -19,6 +19,19 @@ class GetUserView(APIView):
         key = request.data.get('token', '')
         tk = get_object_or_404(Token, key=key)
         return Response(UserSerializer(tk.user, many=False).data)
+    
+
+# class GetUserDiscordView(APIView):
+#     def post(self, request):
+#         user =   
+    
+
+class LoginDiscordView(APIView):
+    # el método me va a traer: username password
+    def post(self, request):
+        key = request.data.get('token', '')
+        tk = get_object_or_404(Token, key=key)
+        return Response(UserSerializer(tk.user, many=False).data)
 
 
 class LogoutView(APIView):
