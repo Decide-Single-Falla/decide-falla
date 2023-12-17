@@ -216,6 +216,7 @@ class VotingTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json(), 'Voting already tallied')
 
+    # Added 405 case
     def test_update_voting_405(self):
         v = self.create_voting()
         data = {}
