@@ -71,3 +71,14 @@ jobs:
       with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: decide/coverage.xml
+    - name: Install discord requirements
+      run: |
+        cd discord
+        pip install -r requirements.txt
+    - name: Run discord tests
+      run: |
+        cd decide
+        python manage.py runserver &
+        sleep 5
+        cd voting
+        pytest discord_t.py
