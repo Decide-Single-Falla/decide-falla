@@ -77,4 +77,4 @@ jobs:
         pip install -r requirements.txt
 
     - name: Run discord tests
-      run: cd voting && pytest tests/discord_t.py
+      run: cd decide/voting && pytest tests/discord_t.py
