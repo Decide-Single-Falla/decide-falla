@@ -80,5 +80,5 @@ jobs:
       #first run runserver
       run: cd decide && ./manage.py runserver
       #then run tests
-      run: cd discord && pytest discord_t.py
+      run: cd voting && pytest discord_t.py
       # run: cd decide/voting && pytest discord_t.py
