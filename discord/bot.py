@@ -154,14 +154,14 @@ async def get_voting(ctx, *args):
         await post_voting(ctx, reaction, voting, emotes.index(reaction[0].emoji) - 1)
         return
 
-@bot.command(name="list_active_votings", help="List all votings")
+@bot.command(name="list_active_votings", help="List active votings")
 async def list_active_votings(ctx):
     response = requests.get(BASE_URL + "voting/", timeout=5)
     votings = response.json()
     embeds = format_votings_list(votings)
     await Paginator.Simple().start(ctx, pages=embeds)
 
-@bot.command(name="list_all_votings", help="List active votings")
+@bot.command(name="list_all_votings", help="List all votings")
 async def list_all_votings(ctx):
     response = requests.get(BASE_URL + "voting/", timeout=5)
     votings = response.json()
