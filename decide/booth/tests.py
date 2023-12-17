@@ -94,6 +94,44 @@ class SeleniumBoothTestCase(StaticLiveServerTestCase):
         time.sleep(1)
         vState= self.driver.find_element(By.CSS_SELECTOR,".alert-success").text
         self.assertTrue(vState, 'Congratulations. Your vote has been sent')
+    
+    def test_selenium_booth_logout(self):
+
+        self.base.login('test', 'testpassword')
+
+        self.driver.get(f'{self.live_server_url}/booth/{self.v.pk}/')
+        time.sleep(1)
+        self.driver.find_element(By.CSS_SELECTOR, ".navbar-toggler-icon").click()
+        time.sleep(1)
+        self.driver.find_element(By.CSS_SELECTOR, ".btn-secondary").click()
+        time.sleep(1)
+        self.driver.find_element(By.ID, "username").send_keys("test")
+        self.driver.find_element(By.ID, "password").send_keys("testpassword")
+        self.driver.find_element(By.CSS_SELECTOR, ".btn-primary").click()
+        time.sleep(1)
+        # Now we click on the logout button
+        self.driver.find_element(By.CSS_SELECTOR, ".btn-secondary").click()
+        time.sleep(1)
+        # We should be redirected to the login page, we check the text
+        # in the same btn-secondary button
+        self.assertEqual(self.driver.find_element(By.CSS_SELECTOR, ".btn-secondary").text, 'Login')
+
+    def test_selenium_booth_failed_login(self):
+
+        self.base.login('test', 'testpassword')
+
+        self.driver.get(f'{self.live_server_url}/booth/{self.v.pk}/')
+        time.sleep(1)
+        self.driver.find_element(By.CSS_SELECTOR, ".navbar-toggler-icon").click()
+        time.sleep(1)
+        self.driver.find_element(By.CSS_SELECTOR, ".btn-secondary").click()
+        time.sleep(1)
+        self.driver.find_element(By.ID, "username").send_keys("test")
+        self.driver.find_element(By.ID, "password").send_keys("testpassword-fake")
+        self.driver.find_element(By.CSS_SELECTOR, ".btn-primary").click()
+        time.sleep(1)
+        # In div class alert alert-danger we should have the error message Error: Bad Request
+        self.assertEqual(self.driver.find_element(By.CSS_SELECTOR, ".alert-danger").text, 'Error: Bad Request')
 
 class PrivateVotingBoothTestCase(StaticLiveServerTestCase):
 
