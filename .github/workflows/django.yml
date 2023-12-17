@@ -75,10 +75,10 @@ jobs:
       run: |
         cd discord
         pip install -r requirements.txt
-
     - name: Run discord tests
-      #first run runserver
-      run: cd decide && ./manage.py runserver
-      #then run tests
-      run: cd voting && pytest discord_t.py
-      # run: cd decide/voting && pytest discord_t.py
+      run: |
+        cd decide
+        python manage.py runserver &
+        sleep 5
+        cd voting
+        pytest discord_t.py
