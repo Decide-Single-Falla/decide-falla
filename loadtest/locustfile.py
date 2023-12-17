@@ -62,6 +62,51 @@ class DefVoters(SequentialTaskSet):
     def on_quit(self):
         self.voter = None
 
+class DefDiscordVoters(SequentialTaskSet):
+
+    def on_start(self):
+        with open('voters.json') as f:
+            self.voters = json.loads(f.read())
+        self.voter = choice(list(self.voters.items()))
+
+    @task
+    def login(self):
+        username, pwd = self.voter
+        self.token = self.client.post("/authentication/login/", {
+            "username": username,
+            "password": pwd,
+        }).json()
+
+    @task
+    def getuser(self):
+        self.usr= self.client.post("/authentication/getuser/", self.token).json()
+        print( str(self.user))
+
+    @task
+    def voting(self):
+        headers = {
+            'Authorization': 'Token ' + self.token.get('token'),
+            'content-type': 'application/json'
+        }
+        # now we use the discord endpoint to vote
+        voting_id = VOTING
+        voter_id = self.usr.get('id')
+        selectedOption = 1 
+        url = f"/store/discord/{voting_id}/{voter_id}/{selectedOption}/"
+        self.client.post(url, json.dumps({
+            "token": self.token.get('token'),
+            "vote": {
+                "a": "12",
+                "b": "64"
+            },
+            "voter": voter_id,
+            "voting": voting_id
+        }), headers=headers)
+
+
+    def on_quit(self):
+        self.voter = None
+
 class DefPrivateVoting(SequentialTaskSet):
     
     @task
@@ -112,4 +157,9 @@ class Voters(HttpUser):
 class PrivateVoting(HttpUser):
     host = HOST
     tasks = [DefPrivateVoting]
+    wait_time= between(3,5)
+
+class DiscordVoters(HttpUser):
+    host = HOST
+    tasks = [DefDiscordVoters]
     wait_time= between(3,5)
