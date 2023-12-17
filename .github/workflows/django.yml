@@ -57,17 +57,24 @@ jobs:
         pip install -r requirements.txt
         pip install codacy-coverage
         cp decide/local_settings.gactions.py decide/local_settings.py
-    - name: Run migrations (unnecessary)
+    # - name: Run migrations (unnecessary)
+    #   run: |
+    #     cd decide
+    #     python manage.py migrate
+    # - name: Run tests
+    #   run: |
+    #     cd decide
+    #     coverage run --branch --source=. ./manage.py test  --keepdb
+    #     coverage xml 
+    # - name: Codacy Coverage Reporter
+    #   uses: codacy/codacy-coverage-reporter-action@v1
+    #   with:
+    #       project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+    #       coverage-reports: decide/coverage.xml
+    - name: Install discord requirements
       run: |
-        cd decide
-        python manage.py migrate
-    - name: Run tests
-      run: |
-        cd decide
-        coverage run --branch --source=. ./manage.py test  --keepdb
-        coverage xml 
-    - name: Codacy Coverage Reporter
-      uses: codacy/codacy-coverage-reporter-action@v1
-      with:
-          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-          coverage-reports: decide/coverage.xml
+        cd discord
+        pip install -r requirements.txt
+
+    - name: Run discord tests
+      run: cd voting && pytest tests/discord_t.py
