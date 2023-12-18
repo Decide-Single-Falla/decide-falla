@@ -246,13 +246,39 @@ async def post_voting(ctx, reaction, voting, selected_option):
     print("Selected_option es: ", selected_option)
 
     # List = [username, password]
+    # credentials = await private_message_to_login(ctx, msg="Hello")
+    # token = login_user(credentials[0], credentials[1])
+    # print("Token es: ", token)
+    # #getuser/token/
+    # get_user = f'{BASE_URL}authentication/getuser/'
+    # # response = requests.post(get_user, headers={'Authorization':token}, timeout=5)
+    # response = requests.post('/authentication/getuser/', token, format='json')
+    # print("get_user es: ", get_user)
+    # print("Response es ", response.text)
+    # url = f'{BASE_URL}store/discord/{voting_id}/{discord_voter_id}/{selected_option}/'
+    # response = requests.post(url, timeout=5)
+
+
+    import requests
+
     credentials = await private_message_to_login(ctx, msg="Hello")
     token = login_user(credentials[0], credentials[1])
+    print("Token es: ", token)
 
-    url = f'{BASE_URL}store/discord/{voting_id}/{discord_voter_id}/{selected_option}/'
-    response = requests.post(url, timeout=5)
+    get_user = f'{BASE_URL}authentication/getuser/'
 
-    #print("Url es: ", url)
+    headers = {'Accept': 'application/json'}
+    data={'token': str(token['token'])}
+    print("Headers es: ", headers)
+
+    response = requests.post(get_user, headers=headers, json=data).json()
+    print("Response es ", response)
+    discord_voter_id = response['id']
+    
+    url = f'{BASE_URL}store/discord/{voting_id}/{discord_voter_id}/{selected_option+1}/'
+    response = requests.post(url, headers=headers,json=data)
+    print("Response es: ", response.text)
+    print("Url es: ", url)
     #print("Response es: ", response)
     #print("Status code es: ", response.status_code)
     
@@ -275,7 +301,8 @@ async def private_message_to_login(ctx,msg):
 def login_user(username, password):
     data = {'username': username, 'password': password}
     response = requests.post(f'{BASE_URL}authentication/login/', data=data)
-    login_token = response['token']
+    # login_token = response.json()['token']
+    login_token = response.json()
     return login_token
 
 ### --- Run Bot --- ###
