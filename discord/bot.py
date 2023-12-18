@@ -263,29 +263,41 @@ async def post_voting(ctx, reaction, voting, selected_option):
 
     credentials = await private_message_to_login(ctx, msg="Hello")
     token = login_user(credentials[0], credentials[1])
-    print("Token es: ", token)
 
     get_user = f'{BASE_URL}authentication/getuser/'
 
     headers = {'Accept': 'application/json'}
     data={'token': str(token['token'])}
-    print("Headers es: ", headers)
 
     response = requests.post(get_user, headers=headers, json=data).json()
-    print("Response es ", response)
     discord_voter_id = response['id']
+
+    #primero comprobamos que está en el census:
+    census_url = f'{BASE_URL}census/list/{voting_id}/'
+    response_census = requests.get(census_url)
+
+    if not check_census(response_census.json(), discord_voter_id):
+        print("User not in census")
+        await ctx.send("User not in census")
     
-    url = f'{BASE_URL}store/discord/{voting_id}/{discord_voter_id}/{selected_option+1}/'
-    response = requests.post(url, headers=headers,json=data)
-    print("Response es: ", response.text)
-    print("Url es: ", url)
-    #print("Response es: ", response)
-    #print("Status code es: ", response.status_code)
-    
-    if response.status_code == 200:
-        await ctx.send(f"**{ctx.author}**, your vote has been recorded. You voted for option {str(reaction[0].emoji)}")
     else:
-        await ctx.send(f"**{ctx.author}**, there was an error recording your vote.")
+        print("Census url: ", census_url)
+        print("Response census: ", response_census.text)
+        
+        url = f'{BASE_URL}store/discord/{voting_id}/{discord_voter_id}/{selected_option+1}/'
+        response = requests.post(url, headers=headers,json=data)
+        
+        if response.status_code == 200:
+            await ctx.send(f"**{ctx.author}**, your vote has been recorded. You voted for option {str(reaction[0].emoji)}")
+        else:
+            await ctx.send(f"**{ctx.author}**, there was an error recording your vote.")
+
+def check_census(response, userid):
+    user_list = []
+    for census in response:
+        user_list.append(str(census['voter_id']))
+    print("User list es: ", user_list)
+    return str(userid) in user_list
 
 async def private_message_to_login(ctx,msg):
     userid = ctx.author.id
