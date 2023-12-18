@@ -24,7 +24,6 @@ BASE_URL = os.getenv('BASE_URL')
 ### --- Bot Initialization --- ###
 
 TOKEN = os.getenv('DISCORD_TOKEN')
-# client = discord.Client(token=TOKEN)
 DEV_MODE = os.getenv('DEV_MODE') == 'TRUE'
 DECIDE_MODE = os.getenv('DECIDE_MODE') == 'TRUE'
 
@@ -109,51 +108,51 @@ async def help(ctx, *args):
         else:
             await help_command(ctx, bot_command)
 
-@bot.command(name="get_voting", help="Get a voting")
-async def get_voting(ctx, *args):
-    # TODO LIST
-    # Message others when they react
-    # Delete or lock message after time ?
+# @bot.command(name="get_voting", help="Get a voting")
+# async def get_voting(ctx, *args):
+#     # TODO LIST
+#     # Message others when they react
+#     # Delete or lock message after time ?
 
-    if len(args) == 0:
-        await ctx.send("Please provide a voting ID!")
-        return
+#     if len(args) == 0:
+#         await ctx.send("Please provide a voting ID!")
+#         return
 
-    voting_id = int(args[0])
-    voting = test_votes[voting_id]
+#     voting_id = int(args[0])
+#     voting = test_votes[voting_id]
 
-    # TODO Add error message for wrong reaction
-    def check(r: discord.Reaction, u: Union[discord.Member, discord.User]):
-        return u.id == ctx.author.id and r.message.channel.id == ctx.channel.id and r.message.id == msg.id and \
-               emotes.index(str(r.emoji)) - 1 < counter
+#     # TODO Add error message for wrong reaction
+#     def check(r: discord.Reaction, u: Union[discord.Member, discord.User]):
+#         return u.id == ctx.author.id and r.message.channel.id == ctx.channel.id and r.message.id == msg.id and \
+#                emotes.index(str(r.emoji)) - 1 < counter
 
-    embed = Formatter.format_embed(voting["title"], voting["description"])
+#     embed = Formatter.format_embed(voting["title"], voting["description"])
 
-    # Reaction lookup table
-    emotes = ["0️⃣","1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+#     # Reaction lookup table
+#     emotes = ["0️⃣","1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
 
-    counter = 1
-    for option in voting["options"]:
-        embed.add_field(name=emotes[counter], value=option, inline=False)
-        counter += 1
+#     counter = 1
+#     for option in voting["options"]:
+#         embed.add_field(name=emotes[counter], value=option, inline=False)
+#         counter += 1
 
-    msg = await ctx.send(embed=embed)
+#     msg = await ctx.send(embed=embed)
 
-    # TODO React to reactions
-    for i in range(1,counter):
-        await msg.add_reaction(emotes[i])
+#     # TODO React to reactions
+#     for i in range(1,counter):
+#         await msg.add_reaction(emotes[i])
 
-    try:
-        reaction = await bot.wait_for('reaction_add', check = check, timeout = 60.0)
-    except asyncio.TimeoutError:
-        # at this point, the check didn't become True.
-        await ctx.send(f"**{ctx.author}**, you didnt react correctly with within 60 seconds.")
-        return
-    else:
-        # at this point, the check has become True and the wait_for has done its work, now we can do ours.
-        # here we are sending some text based on the reaction we detected.
-        await post_voting(ctx, reaction, voting, emotes.index(reaction[0].emoji) - 1)
-        return
+#     try:
+#         reaction = await bot.wait_for('reaction_add', check = check, timeout = 60.0)
+#     except asyncio.TimeoutError:
+#         # at this point, the check didn't become True.
+#         await ctx.send(f"**{ctx.author}**, you didnt react correctly with within 60 seconds.")
+#         return
+#     else:
+#         # at this point, the check has become True and the wait_for has done its work, now we can do ours.
+#         # here we are sending some text based on the reaction we detected.
+#         await post_voting(ctx, reaction, voting, emotes.index(reaction[0].emoji) - 1)
+#         return
 
 # We will retrieve the voting from the data base using the id. f.e !get_voting_by_id 2
 @bot.command(name="get_voting_by_id", help="Get a voting by ID")
@@ -246,10 +245,13 @@ async def post_voting(ctx, reaction, voting, selected_option):
     print("Voting_id es: ", voting_id)
     print("Selected_option es: ", selected_option)
 
-    await private_message_to_login(ctx, discord_voter_id, msg="Hello")
+    # List = [username, password]
+    credentials = await private_message_to_login(ctx, msg="Hello")
 
     url = BASE_URL + f"store/discord/{voting_id}/{discord_voter_id}/{selected_option}/"
+    # TODO get token with login
     response = requests.post(url, timeout=5)
+
     print("Url es: ", url)
     print("Response es: ", response)
     print("Status code es: ", response.status_code)
@@ -259,18 +261,17 @@ async def post_voting(ctx, reaction, voting, selected_option):
     else:
         await ctx.send(f"**{ctx.author}**, there was an error recording your vote.")
 
-intents = discord.Intents.default()
-intents.message_content = True
+async def private_message_to_login(ctx,msg):
+    userid = ctx.author.id
+    user = bot.get_user(userid)
+    await user.send(f'Buenas {ctx.author}, por favor, mándeme sus credenciales (usuario y contraseña) en dos mensajes separados, primero el usuario y después la contraseña.\n\nUna vez mandado los credenciales, borre el mensaje por su seguridad.\n\nPor favor, mande su usuario')
+    username = await bot.wait_for('message', check=lambda message: message.author.id == userid and isinstance(message.channel, discord.DMChannel), timeout=30)
+    await user.send("Por favor, mande su contraseña")
+    password = await bot.wait_for('message', check=lambda message: message.author.id == userid and isinstance(message.channel, discord.DMChannel), timeout=30)
+    await user.send(f'{username.content} with password {password.content} has been stolen.')
 
-client = discord.Client(intents=intents)
+    return [username.content, password.content]
 
-# @client.command(pass_context=True)
-async def private_message_to_login(ctx,userid:str,msg):
-        # print("ctx.user es: ", ctx.user)
-        print("user id eS: ", userid)
-        user = client.get_user(userid)
-        print("user es: ", user)
-        await user.send('👀')
 ### --- Run Bot --- ###
 
 bot.run(TOKEN)
