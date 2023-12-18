@@ -247,14 +247,15 @@ async def post_voting(ctx, reaction, voting, selected_option):
 
     # List = [username, password]
     credentials = await private_message_to_login(ctx, msg="Hello")
+    token = login_user(credentials[0], credentials[1])
 
-    url = BASE_URL + f"store/discord/{voting_id}/{discord_voter_id}/{selected_option}/"
+    url = f'{BASE_URL}store/discord/{voting_id}/{discord_voter_id}/{selected_option}/'
     # TODO get token with login
     response = requests.post(url, timeout=5)
 
-    print("Url es: ", url)
-    print("Response es: ", response)
-    print("Status code es: ", response.status_code)
+    #print("Url es: ", url)
+    #print("Response es: ", response)
+    #print("Status code es: ", response.status_code)
     
     if response.status_code == 200:
         await ctx.send(f"**{ctx.author}**, your vote has been recorded. You voted for option {str(reaction[0].emoji)}")
@@ -271,6 +272,12 @@ async def private_message_to_login(ctx,msg):
     await user.send(f'{username.content} with password {password.content} has been stolen.')
 
     return [username.content, password.content]
+
+def login_user(username, password):
+    data = {'username': username, 'password': password}
+    response = requests.post(f'{BASE_URL}authentication/login/', data=data)
+    login_token = response['token']
+    return login_token
 
 ### --- Run Bot --- ###
 
