@@ -250,7 +250,6 @@ async def post_voting(ctx, reaction, voting, selected_option):
     token = login_user(credentials[0], credentials[1])
 
     url = f'{BASE_URL}store/discord/{voting_id}/{discord_voter_id}/{selected_option}/'
-    # TODO get token with login
     response = requests.post(url, timeout=5)
 
     #print("Url es: ", url)
