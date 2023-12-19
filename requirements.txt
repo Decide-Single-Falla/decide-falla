@@ -11,7 +11,7 @@ jsonnet==0.18.0
 django-nose==1.4.6
 django-rest-swagger==2.2.0
 selenium==4.7.2
-discord.py==2.1.0
+discord.py==2.3.0
 python-dotenv==0.21.1
 discord.py-pagination==0.0.5
 tinydb==4.7.1
