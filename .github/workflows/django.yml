@@ -61,28 +61,37 @@ jobs:
       run: |
         cd decide
         python manage.py migrate
-     - name: Run tests
-       run: |
-         cd decide
-         coverage run --branch --source=. ./manage.py test  --keepdb
-         coverage xml 
-     - name: Codacy Coverage Reporter
-       uses: codacy/codacy-coverage-reporter-action@v1
-       with:
-           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-           coverage-reports: decide/coverage.xml
+    - name: Run tests
+      run: |
+        cd decide
+        coverage run --branch --source=. ./manage.py test  --keepdb
+        coverage xml 
+    - name: Codacy Coverage Reporter
+      uses: codacy/codacy-coverage-reporter-action@v1
+      with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          coverage-reports: decide/coverage.xml
     - name: Install discord requirements
       run: |
         cd discord
         pip install -r requirements.txt
     - name: Run discord tests
       run: |
-        cd discord/test
-        pytest discord_help_t.py
-    - name: Run discord-decide tests
-      run: |
         cd decide
         python manage.py runserver &
         sleep 5
         cd voting
         pytest discord_t.py
+    - name: Run discord-vote tests
+      run: |
+        cd decide
+        python manage.py runserver &
+        sleep 5
+        cd voting
+        pytest discord_vote_t.py
+    - name: Run discord bot tests
+      run: |
+        cd discord
+        sleep 5
+        cd test
+        pytest discord_help_t.py
