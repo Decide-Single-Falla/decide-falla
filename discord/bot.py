@@ -197,19 +197,19 @@ async def post_voting(ctx, reaction, voting, selected_option):
     headers = {'Accept': 'application/json'}
     data={'token': str(token['token'])}
 
-    response = requests.post(get_user, headers=headers, json=data).json()
+    response = requests.post(get_user, headers=headers, json=data, timeout=10).json()
     discord_voter_id = response['id']
 
     #primero comprobamos que está en el census:
     census_url = f'{BASE_URL}census/list/{voting_id}/'
-    response_census = requests.get(census_url)
+    response_census = requests.get(census_url, timeout=10)
 
     if not check_census(response_census.json(), discord_voter_id):
         await ctx.send("User not in census")
     
     else:
         url = f'{BASE_URL}store/discord/{voting_id}/{discord_voter_id}/{selected_option+1}/'
-        response = requests.post(url, headers=headers,json=data)
+        response = requests.post(url, headers=headers,json=data, timeout=10)
         
         if response.status_code == 200:
             await ctx.send(f"**{ctx.author}**, your vote has been recorded. You voted for option {str(reaction[0].emoji)}")
@@ -228,7 +228,8 @@ async def private_message_to_login(ctx,msg):
     userid = ctx.author.id
     user = bot.get_user(userid)
     
-    await user.send(f'Buenas {ctx.author}, por favor, mándeme sus credenciales (usuario y contraseña) en dos mensajes separados, primero el usuario y después la contraseña.\n\nUna vez mandado los credenciales, borre el mensaje por su seguridad.\n\nPor favor, mande su usuario')
+    await user.send(f'Buenas {ctx.author}, por favor, mándeme sus credenciales (usuario y contraseña) en dos mensajes separados, primero el usuario y después la contraseña.')
+    await user.send(f'Una vez mandado los credenciales, borre el mensaje por su seguridad.\n\nPor favor, mande su usuario')
     username = await bot.wait_for('message', check=lambda message: message.author.id == userid and isinstance(message.channel, discord.DMChannel), timeout=30)
     
     await user.send("Por favor, mande su contraseña")
@@ -240,7 +241,7 @@ async def private_message_to_login(ctx,msg):
 
 def login_user(username, password):
     data = {'username': username, 'password': password}
-    response = requests.post(f'{BASE_URL}authentication/login/', data=data)
+    response = requests.post(f'{BASE_URL}authentication/login/', data=data, timeout=10)
     login_token = response.json()
     return login_token
 
