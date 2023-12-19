@@ -41,14 +41,14 @@ async def bot():
     # Teardown
     await dpytest.empty_queue() # empty the global message queue as test teardown
 
-############# TEST ############# DONE
+############# WORKING TESTS ############# 
 
-#TODO: Create a votation in the database and test the list_all_votings command
+# Para ejecutar este test debemos situarnos en la ruta del test y ejecutar 'pytest discord_t.py'
 
 @pytest.mark.asyncio
-async def test_list_all_votings(bot):
+async def test_embed_votings_creation(bot):
     await dpytest.message("!list_all_votings")
-    title = dpytest.get_embed().title
-    assert "Votings" in title
-
-    
+    response = dpytest.get_message()
+    embed = response.embeds[0]
+    print("Embed to dict: ", embed.to_dict())
+    assert embed.title == "Votings"

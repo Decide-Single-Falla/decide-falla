@@ -1,16 +1,25 @@
 name: Python application
 
 on:
-  push:
-    branches:
-      - master
-      - develop
   pull_request:
     branches:
       - master
       - develop
 
 jobs:
+
+  PrTitleChecker:
+    if: |
+      github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+      - uses: thehanimo/pr-title-checker@v1.4.0
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          pass_on_octokit_error: false
+          configuration_path: ".github/pr-title-checker-config.json"
+
   build:
     strategy:
       matrix:
@@ -58,3 +67,20 @@ jobs:
       with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: decide/coverage.xml
+    - name: Install discord requirements
+      run: |
+        cd discord
+        pip install -r requirements.txt
+    - name: Run discord tests
+      run: |
+        cd decide
+        python manage.py runserver &
+        sleep 5
+        cd voting
+        pytest discord_t.py
+    - name: Run discord bot tests
+      run: |
+        cd discord
+        sleep 5
+        cd test
+        pytest discord_help_t.py

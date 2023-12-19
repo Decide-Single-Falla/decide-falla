@@ -23,7 +23,6 @@ from mixnet.models import Auth
 from voting.models import Voting, Question, QuestionOption
 from datetime import datetime
 
-
 class VotingTestCase(BaseTestCase):
 
     def setUp(self):
@@ -216,6 +215,21 @@ class VotingTestCase(BaseTestCase):
         response = self.client.put('/voting/{}/'.format(voting.pk), data, format='json')
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json(), 'Voting already tallied')
+
+    # Added 405 case
+    def test_update_voting_405(self):
+        v = self.create_voting()
+        data = {}
+        self.login()
+        response = self.client.post('/voting/{}/'.format(v.pk), data, format= 'json')
+        self.assertEquals(response.status_code, 405)
+
+    def test_details_voting(self):
+
+        votingId = self.create_voting().pk
+        response = self.client.get('/voting/details/{}/'.format(votingId), format = 'json')
+        self.assertEqual(response.status_code, 200)
+
 
 class LogInSuccessTests(StaticLiveServerTestCase):
 
