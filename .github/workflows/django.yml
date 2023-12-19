@@ -61,16 +61,16 @@ jobs:
       run: |
         cd decide
         python manage.py migrate
-    # - name: Run tests
-    #   run: |
-    #     cd decide
-    #     coverage run --branch --source=. ./manage.py test  --keepdb
-    #     coverage xml 
-    # - name: Codacy Coverage Reporter
-    #   uses: codacy/codacy-coverage-reporter-action@v1
-    #   with:
-    #       project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-    #       coverage-reports: decide/coverage.xml
+     - name: Run tests
+       run: |
+         cd decide
+         coverage run --branch --source=. ./manage.py test  --keepdb
+         coverage xml 
+     - name: Codacy Coverage Reporter
+       uses: codacy/codacy-coverage-reporter-action@v1
+       with:
+           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+           coverage-reports: decide/coverage.xml
     - name: Install discord requirements
       run: |
         cd discord
