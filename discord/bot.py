@@ -228,8 +228,8 @@ async def private_message_to_login(ctx,msg):
     userid = ctx.author.id
     user = bot.get_user(userid)
     
-    await user.send(f'Buenas {ctx.author}, por favor, mándeme sus credenciales (usuario y contraseña) en dos mensajes separados, primero el usuario y después la contraseña.')
-    await user.send(f'Una vez mandado los credenciales, borre el mensaje por su seguridad.\n\nPor favor, mande su usuario')
+    await user.send(f'Buenas {ctx.author}, por favor, mándeme sus credenciales (usuario y contraseña) en dos mensajes separados.')
+    await user.send('Una vez mandado los credenciales, borre el mensaje por su seguridad.\n\nPor favor, mande su usuario')
     username = await bot.wait_for('message', check=lambda message: message.author.id == userid and isinstance(message.channel, discord.DMChannel), timeout=30)
     
     await user.send("Por favor, mande su contraseña")
