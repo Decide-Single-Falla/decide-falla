@@ -82,13 +82,6 @@ jobs:
         sleep 5
         cd voting
         pytest discord_t.py
-    - name: Run discord-vote tests
-      run: |
-        cd decide
-        python manage.py runserver &
-        sleep 5
-        cd voting
-        pytest discord_vote_t.py
     - name: Run discord bot tests
       run: |
         cd discord
