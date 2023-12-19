@@ -108,8 +108,8 @@ async def help(ctx, *args):
             await help_command(ctx, bot_command)
 
 # We will retrieve the voting from the data base using the id. f.e !get_voting_by_id 2
-@bot.command(name="get_voting_by_id", help="Get a voting by ID")
-async def get_voting_by_id(ctx, *args):
+@bot.command(name="get_voting", help="Get a voting by ID")
+async def get_voting(ctx, *args):
     if len(args) == 0:
         await ctx.send("Please provide a voting ID!")
         return

@@ -76,6 +76,7 @@ async def bot():
 async def test_help(bot):
     await dpytest.message("!help")
     response = dpytest.get_message()
+    print(response)
     embed = response.embeds[0]
     assert embed.title == "List of commands"
     assert embed.fields[0].value == "If you need to know more about a command, use !help <command>"
