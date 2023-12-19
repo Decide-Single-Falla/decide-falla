@@ -210,7 +210,7 @@ async def post_voting(ctx, reaction, voting, selected_option):
     else:
         url = f'{BASE_URL}store/discord/{voting_id}/{discord_voter_id}/{selected_option+1}/'
         response = requests.post(url, headers=headers,json=data, timeout=10)
-        
+
         if response.status_code == 200:
             await ctx.send(f"**{ctx.author}**, your vote has been recorded. You voted for option {str(reaction[0].emoji)}")
         else:
@@ -235,7 +235,7 @@ async def private_message_to_login(ctx,msg):
     await user.send("Por favor, mande su contraseña")
     password = await bot.wait_for('message', check=lambda message: message.author.id == userid and isinstance(message.channel, discord.DMChannel), timeout=30)
     
-    await user.send(f'{username.content} with password {password.content} has been stolen.')
+    await user.send(f'{username.content} has been stolen.')
 
     return [username.content, password.content]
 
