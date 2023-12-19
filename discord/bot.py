@@ -129,7 +129,7 @@ async def get_voting(ctx, *args):
     counter = 1
     options = voting["question"]["options"]
     for option in options:
-        embed.add_field(name=emotes[counter], value=f"{option['number']}. {option['option']}", inline=False)
+        embed.add_field(name=emotes[counter], value=f"{option['option']}", inline=False)
         counter += 1
 
     msg = await ctx.send(embed=embed)
