@@ -108,8 +108,8 @@ async def help(ctx, *args):
             await help_command(ctx, bot_command)
 
 # We will retrieve the voting from the data base using the id. f.e !get_voting_by_id 2
-@bot.command(name="get_voting_by_id", help="Get a voting by ID")
-async def get_voting_by_id(ctx, *args):
+@bot.command(name="get_voting", help="Get a voting by ID")
+async def get_voting(ctx, *args):
     if len(args) == 0:
         await ctx.send("Please provide a voting ID!")
         return
@@ -146,14 +146,14 @@ async def get_voting_by_id(ctx, *args):
         await post_voting(ctx, reaction, voting, emotes.index(reaction[0].emoji) - 1)
         return
 
-@bot.command(name="list_active_votings", help="List all votings")
+@bot.command(name="list_active_votings", help="List active votings")
 async def list_active_votings(ctx):
     response = requests.get(BASE_URL + "voting/", timeout=5)
     votings = response.json()
     embeds = format_votings_list(votings)
     await Paginator.Simple().start(ctx, pages=embeds)
 
-@bot.command(name="list_all_votings", help="List active votings")
+@bot.command(name="list_all_votings", help="List all votings")
 async def list_all_votings(ctx):
     response = requests.get(BASE_URL + "voting/", timeout=5)
     votings = response.json()
