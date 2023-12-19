@@ -84,6 +84,12 @@ siguiente manera:
 
     ./manage.py runserver
 
+
+Es importante destacar que para el correcto funcionamiento de las implementaciones creadas por el equipo 'Decide-Single-Falla', se han de crear 2 usuarios:
+ 
+- En el caso del segundo usuario (con id=2), debe presentar como nombre de usuario 'anonymous' y con contraseña 'tbo12345'
+- Un usuario con nombre de usuario 'anonymous' y contraseña 'testpassword'
+
 Tests
 -------------------
 
