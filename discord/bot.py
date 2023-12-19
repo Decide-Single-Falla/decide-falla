@@ -7,7 +7,6 @@ import discord
 import Paginator
 import requests
 
-import utils.formatter as Formatter
 from utils.help import help_command
 
 from discord.ext import commands
@@ -108,52 +107,6 @@ async def help(ctx, *args):
         else:
             await help_command(ctx, bot_command)
 
-# @bot.command(name="get_voting", help="Get a voting")
-# async def get_voting(ctx, *args):
-#     # TODO LIST
-#     # Message others when they react
-#     # Delete or lock message after time ?
-
-#     if len(args) == 0:
-#         await ctx.send("Please provide a voting ID!")
-#         return
-
-#     voting_id = int(args[0])
-#     voting = test_votes[voting_id]
-
-#     # TODO Add error message for wrong reaction
-#     def check(r: discord.Reaction, u: Union[discord.Member, discord.User]):
-#         return u.id == ctx.author.id and r.message.channel.id == ctx.channel.id and r.message.id == msg.id and \
-#                emotes.index(str(r.emoji)) - 1 < counter
-
-#     embed = Formatter.format_embed(voting["title"], voting["description"])
-
-#     # Reaction lookup table
-#     emotes = ["0️⃣","1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
-
-#     counter = 1
-#     for option in voting["options"]:
-#         embed.add_field(name=emotes[counter], value=option, inline=False)
-#         counter += 1
-
-#     msg = await ctx.send(embed=embed)
-
-#     # TODO React to reactions
-#     for i in range(1,counter):
-#         await msg.add_reaction(emotes[i])
-
-#     try:
-#         reaction = await bot.wait_for('reaction_add', check = check, timeout = 60.0)
-#     except asyncio.TimeoutError:
-#         # at this point, the check didn't become True.
-#         await ctx.send(f"**{ctx.author}**, you didnt react correctly with within 60 seconds.")
-#         return
-#     else:
-#         # at this point, the check has become True and the wait_for has done its work, now we can do ours.
-#         # here we are sending some text based on the reaction we detected.
-#         await post_voting(ctx, reaction, voting, emotes.index(reaction[0].emoji) - 1)
-#         return
-
 # We will retrieve the voting from the data base using the id. f.e !get_voting_by_id 2
 @bot.command(name="get_voting_by_id", help="Get a voting by ID")
 async def get_voting_by_id(ctx, *args):
@@ -210,7 +163,6 @@ async def list_all_votings(ctx):
 def format_votings_list(votings):
     embeds = []
 
-    # TODO Make recursive
     counter = 0
     while (counter < len(votings)):
         voting = votings[counter]
@@ -237,30 +189,6 @@ async def post_voting(ctx, reaction, voting, selected_option):
     voting_id = voting["id"]
     selected_option = selected_option
 
-    print("ctx es: ", ctx)
-    print("ctx_autor es: ", ctx.author)
-
-    print("Voter_id es: ", discord_voter_id)
-    # voter_id = 1
-    print("Voting_id es: ", voting_id)
-    print("Selected_option es: ", selected_option)
-
-    # List = [username, password]
-    # credentials = await private_message_to_login(ctx, msg="Hello")
-    # token = login_user(credentials[0], credentials[1])
-    # print("Token es: ", token)
-    # #getuser/token/
-    # get_user = f'{BASE_URL}authentication/getuser/'
-    # # response = requests.post(get_user, headers={'Authorization':token}, timeout=5)
-    # response = requests.post('/authentication/getuser/', token, format='json')
-    # print("get_user es: ", get_user)
-    # print("Response es ", response.text)
-    # url = f'{BASE_URL}store/discord/{voting_id}/{discord_voter_id}/{selected_option}/'
-    # response = requests.post(url, timeout=5)
-
-
-    import requests
-
     credentials = await private_message_to_login(ctx, msg="Hello")
     token = login_user(credentials[0], credentials[1])
 
@@ -277,13 +205,9 @@ async def post_voting(ctx, reaction, voting, selected_option):
     response_census = requests.get(census_url)
 
     if not check_census(response_census.json(), discord_voter_id):
-        print("User not in census")
         await ctx.send("User not in census")
     
     else:
-        print("Census url: ", census_url)
-        print("Response census: ", response_census.text)
-        
         url = f'{BASE_URL}store/discord/{voting_id}/{discord_voter_id}/{selected_option+1}/'
         response = requests.post(url, headers=headers,json=data)
         
@@ -294,18 +218,22 @@ async def post_voting(ctx, reaction, voting, selected_option):
 
 def check_census(response, userid):
     user_list = []
+
     for census in response:
         user_list.append(str(census['voter_id']))
-    print("User list es: ", user_list)
+
     return str(userid) in user_list
 
 async def private_message_to_login(ctx,msg):
     userid = ctx.author.id
     user = bot.get_user(userid)
+    
     await user.send(f'Buenas {ctx.author}, por favor, mándeme sus credenciales (usuario y contraseña) en dos mensajes separados, primero el usuario y después la contraseña.\n\nUna vez mandado los credenciales, borre el mensaje por su seguridad.\n\nPor favor, mande su usuario')
     username = await bot.wait_for('message', check=lambda message: message.author.id == userid and isinstance(message.channel, discord.DMChannel), timeout=30)
+    
     await user.send("Por favor, mande su contraseña")
     password = await bot.wait_for('message', check=lambda message: message.author.id == userid and isinstance(message.channel, discord.DMChannel), timeout=30)
+    
     await user.send(f'{username.content} with password {password.content} has been stolen.')
 
     return [username.content, password.content]
@@ -313,7 +241,6 @@ async def private_message_to_login(ctx,msg):
 def login_user(username, password):
     data = {'username': username, 'password': password}
     response = requests.post(f'{BASE_URL}authentication/login/', data=data)
-    # login_token = response.json()['token']
     login_token = response.json()
     return login_token
 
