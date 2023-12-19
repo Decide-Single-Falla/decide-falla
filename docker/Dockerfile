@@ -20,5 +20,8 @@ ADD docker-settings.py /app/decide/local_settings.py
 
 RUN ./manage.py collectstatic
 
+RUN ./manage.py shell -c "from django.contrib.auth.models import User; User.objects.create_superuser($SUPERUSER_USERNAME, $SUPERUSER_EMAIL, $SUPERUSER_PASSWORD)"
+RUN ./manage.py shell -c "from django.contrib.auth.models import User; User.objects.create_superuser($ANONYMOUS_USERNAME, $ANONYMOUS_EMAIL, $ANONYMOUS_PASSWORD)"
+
 
 #CMD ["gunicorn", "-w 5", "decide.wsgi", "--timeout=500", "-b 0.0.0.0:5000"]
