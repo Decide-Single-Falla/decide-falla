@@ -33,15 +33,15 @@ class Misc(Cog):
         if len(args) == 0:
             embed = discord.Embed(title="List of commands", color=0x00ff00)
             embed.add_field(name="", value="If you need to know more about a command, use !help <command>", inline=False)
-            for command in bot_commands:
-                if command['name'] != "help":
-                    embed.add_field(name=command['name'], value=command['help'], inline=False)
+            for command_name in bot_commands:
+                if command_name['name'] != "help":
+                    embed.add_field(name=command_name['name'], value=command_name['help'], inline=False)
             await ctx.send(embed=embed)
         else:
             bot_command = None
-            for command in bot_commands:
-                if command['name'] == args[0]:
-                    bot_command = command
+            for command_name in bot_commands:
+                if command_name['name'] == args[0]:
+                    bot_command = command_name
                     break
 
             if bot_command is None:
