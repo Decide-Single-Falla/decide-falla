@@ -3,11 +3,8 @@ import requests
 import pytest
 import pytest_asyncio
 from discord.ext import commands
-from discord.ext.commands import Cog, command
 import discord.ext.test as dpytest
-from discord import Embed, Color
 from dotenv import load_dotenv
-from typing import Union
 
 load_dotenv()
 
@@ -15,7 +12,7 @@ BASE_URL = 'http://localhost:8000/'
 
 @pytest_asyncio.fixture
 async def bot():
-   # Setup
+    # Setup
     intents = discord.Intents.default()
     intents.members = True
     intents.message_content = True

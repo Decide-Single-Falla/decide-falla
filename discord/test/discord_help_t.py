@@ -1,14 +1,10 @@
 import discord
-import requests
 import pytest
 import pytest_asyncio
 
 from discord.ext import commands
 from discord.ext.commands import Cog, command
 import discord.ext.test as dpytest
-
-from discord import Embed, Color
-from dotenv import load_dotenv
 
 from test_utils.help import help_command
 
