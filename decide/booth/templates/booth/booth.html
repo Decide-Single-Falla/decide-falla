@@ -133,12 +133,12 @@
                 </div>
             </form>
             <div v-if="!voting.private">
-                <button class="btn btn-primary mt-3" v-on:click="decideSend">
+                <button class="btn btn-warning mt-3" v-on:click="decideSend">
                     {% trans "Vote" %}
                 </button>
             </div>
             <div v-if="voting.private">
-                <button class="btn btn-primary mt-3" v-on:click="decideSendAnonymous">
+                <button class="btn btn-warning mt-3" v-on:click="decideSendAnonymous">
                     {% trans "Vote" %}
                 </button>
             </div>
